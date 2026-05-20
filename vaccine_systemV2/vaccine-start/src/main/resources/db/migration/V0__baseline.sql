@@ -1,0 +1,4 @@
+-- Flyway baseline marker
+-- This represents the initial state of the database before Flyway was introduced.
+-- On existing databases, Flyway will create a baseline at this version.
+-- On new databases, this file runs first (no-op).
