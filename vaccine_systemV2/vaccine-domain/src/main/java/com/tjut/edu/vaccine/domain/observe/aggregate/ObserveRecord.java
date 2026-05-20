@@ -66,6 +66,12 @@ public class ObserveRecord implements Serializable {
     }
 
     public void markAbnormal() {
+        if (isFinished()) {
+            throw new IllegalStateException("留观已结束，不可再标记异常");
+        }
+        if (this.observeResult == ObserveResult.ABNORMAL) {
+            throw new IllegalStateException("该记录已标记为异常");
+        }
         this.observeResult = ObserveResult.ABNORMAL;
     }
 }

@@ -31,6 +31,7 @@ public class User implements Serializable {
     private int noShowCount;
     private LocalDateTime freezeStartTime;
     private LocalDateTime freezeEndTime;
+    private String freezeReason;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -53,6 +54,9 @@ public class User implements Serializable {
     public static User register(String phone, String encodedPassword, String realName) {
         if (phone == null || phone.isBlank()) {
             throw new IllegalArgumentException("手机号不能为空");
+        }
+        if (!phone.matches("^1[3-9]\\d{9}$")) {
+            throw new IllegalArgumentException("手机号格式不正确");
         }
         if (encodedPassword == null || encodedPassword.isBlank()) {
             throw new IllegalArgumentException("密码不能为空");
@@ -84,7 +88,7 @@ public class User implements Serializable {
     }
 
     /**
-     * 冻结用户
+     * 冻结用户（管理员手动冻结，永久冻结直到手动解冻）
      */
     public void freeze(String reason) {
         if (status == UserStatus.FROZEN) {
@@ -92,6 +96,8 @@ public class User implements Serializable {
         }
         this.status = UserStatus.FROZEN;
         this.freezeStartTime = LocalDateTime.now();
+        this.freezeEndTime = LocalDateTime.of(2099, 12, 31, 23, 59, 59);
+        this.freezeReason = reason;
         this.updateTime = LocalDateTime.now();
     }
 
@@ -105,6 +111,7 @@ public class User implements Serializable {
         this.status = UserStatus.NORMAL;
         this.freezeStartTime = null;
         this.freezeEndTime = null;
+        this.freezeReason = null;
         this.updateTime = LocalDateTime.now();
     }
 

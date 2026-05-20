@@ -22,6 +22,7 @@ import com.tjut.edu.vaccine.domain.identity.entity.SystemNotice;
 import com.tjut.edu.vaccine.domain.identity.entity.UserRole;
 import com.tjut.edu.vaccine.domain.identity.entity.HospitalWindow;
 import com.tjut.edu.vaccine.domain.identity.entity.VerifyCode;
+import com.tjut.edu.vaccine.domain.identity.entity.WindowRoleMapping;
 import com.tjut.edu.vaccine.domain.identity.repository.HospitalWindowRepository;
 import com.tjut.edu.vaccine.domain.identity.repository.PermissionRepository;
 import com.tjut.edu.vaccine.domain.identity.repository.RolePermissionRepository;
@@ -242,23 +243,6 @@ public class AdminApplicationService {
 
     // ========== 角色管理辅助方法 ==========
 
-    /** 所有 DOCTOR_* 角色编码（窗口分配用，不含库管） */
-    private static final Set<String> DOCTOR_ROLE_CODES = Set.of(
-            "DOCTOR_SIGNIN",
-            "DOCTOR_PRECHECK",
-            "DOCTOR_REGISTER",
-            "DOCTOR_VACCINATE", "DOCTOR_OBSERVE"
-    );
-
-    /** 窗口功能类型 → 对应医生角色编码 */
-    private static final Map<String, String> WINDOW_TYPE_TO_ROLE = Map.of(
-            "SIGNIN", "DOCTOR_SIGNIN",
-            "PRECHECK", "DOCTOR_PRECHECK",
-            "REGISTER", "DOCTOR_REGISTER",
-            "VACCINATE", "DOCTOR_VACCINATE",
-            "OBSERVE", "DOCTOR_OBSERVE"
-    );
-
     /**
      * 安排医生到窗口：直接在窗口上设置 doctorId，同时赋予对应角色权限
      * 如果目标窗口已被其他医生占据，自动将原医生降为后勤
@@ -302,7 +286,7 @@ public class AdminApplicationService {
 
         // 5. 通过窗口功能类型匹配角色
         String windowType = window.getWindowFunctionType();
-        String roleCode = WINDOW_TYPE_TO_ROLE.get(windowType);
+        String roleCode = WindowRoleMapping.WINDOW_TYPE_TO_ROLE.get(windowType);
         if (roleCode == null) {
             log.warn("窗口功能类型无对应角色: windowType={}, windowId={}", windowType, windowId);
             return;
@@ -342,7 +326,7 @@ public class AdminApplicationService {
         List<UserRole> existing = userRoleRepository.findByUserId(userId);
         for (UserRole ur : existing) {
             Role role = roleRepository.findById(ur.getRoleId());
-            if (role != null && DOCTOR_ROLE_CODES.contains(role.getRoleCode())) {
+            if (role != null && WindowRoleMapping.DOCTOR_ROLE_CODES.contains(role.getRoleCode())) {
                 userRoleRepository.deleteByUserIdAndRoleId(userId, ur.getRoleId());
             }
         }

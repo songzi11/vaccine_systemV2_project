@@ -45,6 +45,9 @@ public class VaccineBatch implements Serializable {
         if (expiryDate == null) {
             throw new IllegalArgumentException("过期日期不能为空");
         }
+        if (productionDate != null && !productionDate.isBefore(expiryDate)) {
+            throw new IllegalArgumentException("生产日期必须早于过期日期");
+        }
         this.batchNo = batchNo;
         this.vaccineId = vaccineId;
         this.manufacturer = manufacturer;

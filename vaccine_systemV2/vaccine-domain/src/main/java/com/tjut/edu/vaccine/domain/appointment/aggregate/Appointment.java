@@ -92,6 +92,33 @@ public class Appointment implements Serializable {
     }
 
     /**
+     * 从持久化层重建聚合根（仅供 Converter 调用）
+     */
+    public static Appointment reconstruct(Long id, String appointmentNo, Long userId, Long childId,
+                                          Long vaccineId, LocalDate appointmentDate, String timeSlot,
+                                          int status, String currentWindow, LocalDateTime signinTime,
+                                          LocalDateTime cancelTime, String cancelReason, Long batchId,
+                                          LocalDateTime createTime, LocalDateTime updateTime) {
+        Appointment a = new Appointment();
+        a.id = id;
+        a.appointmentNo = appointmentNo;
+        a.userId = userId;
+        a.childId = childId;
+        a.vaccineId = vaccineId;
+        a.appointmentDate = appointmentDate;
+        a.timeSlot = timeSlot;
+        a.status = status;
+        a.currentWindow = currentWindow;
+        a.signinTime = signinTime;
+        a.cancelTime = cancelTime;
+        a.cancelReason = cancelReason;
+        a.batchId = batchId;
+        a.createTime = createTime;
+        a.updateTime = updateTime;
+        return a;
+    }
+
+    /**
      * 取消预约
      */
     public void cancel(String reason) {

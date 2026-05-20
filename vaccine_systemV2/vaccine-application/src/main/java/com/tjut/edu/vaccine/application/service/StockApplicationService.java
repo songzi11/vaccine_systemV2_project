@@ -7,6 +7,7 @@ import com.tjut.edu.vaccine.application.dto.request.StockTransferRequest;
 import com.tjut.edu.vaccine.application.dto.response.HospitalStockResponse;
 import com.tjut.edu.vaccine.application.dto.response.StockAlertResponse;
 import com.tjut.edu.vaccine.application.dto.response.StockSummaryResponse;
+import com.tjut.edu.vaccine.application.dto.response.StockTransferResponse;
 import com.tjut.edu.vaccine.application.dto.response.VaccineBatchResponse;
 import com.tjut.edu.vaccine.common.enums.AlertType;
 import com.tjut.edu.vaccine.common.enums.BatchStatus;
@@ -302,37 +303,34 @@ public class StockApplicationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> findTransferRecordsEnriched(int page, int size) {
+    public List<StockTransferResponse> findTransferRecordsEnriched(int page, int size) {
         List<StockTransferLog> logs = stockTransferLogRepository.findAll(page, size);
         return logs.stream().map(log -> {
-            Map<String, Object> map = new java.util.HashMap<>();
-            map.put("id", log.getId());
-            map.put("transferNo", log.getTransferNo());
-            map.put("batchId", log.getBatchId());
-            map.put("fromType", log.getFromType());
-            map.put("fromId", log.getFromId());
-            map.put("toType", log.getToType());
-            map.put("toId", log.getToId());
-            map.put("quantity", log.getQuantity());
-            map.put("operatorId", log.getOperatorId());
-            map.put("transferTime", log.getTransferTime() != null ? log.getTransferTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-            map.put("remark", log.getRemark());
-            map.put("createTime", log.getCreateTime() != null ? log.getCreateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
-            // Enrich with batch info
+            StockTransferResponse resp = new StockTransferResponse();
+            resp.setId(log.getId());
+            resp.setTransferNo(log.getTransferNo());
+            resp.setBatchId(log.getBatchId());
+            resp.setFromType(log.getFromType());
+            resp.setFromId(log.getFromId());
+            resp.setToType(log.getToType());
+            resp.setToId(log.getToId());
+            resp.setQuantity(log.getQuantity());
+            resp.setOperatorId(log.getOperatorId());
+            resp.setTransferTime(log.getTransferTime());
+            resp.setRemark(log.getRemark());
+            resp.setCreateTime(log.getCreateTime());
             vaccineBatchRepository.findById(log.getBatchId()).ifPresent(batch -> {
-                map.put("batchNo", batch.getBatchNo());
+                resp.setBatchNo(batch.getBatchNo());
             });
-            // Enrich with operator name
             if (log.getOperatorId() != null) {
                 User operator = userRepository.findById(log.getOperatorId());
                 if (operator != null) {
-                    map.put("operatorName", operator.getRealName());
+                    resp.setOperatorName(operator.getRealName());
                 }
             }
-            // Location names (simplified)
-            map.put("fromLocationName", log.getFromType() == 0 ? "仓库" : "医院-" + log.getFromId());
-            map.put("toLocationName", log.getToType() == 0 ? "仓库" : "医院-" + log.getToId());
-            return map;
+            resp.setFromLocationName(log.getFromType() == 0 ? "仓库" : "医院-" + log.getFromId());
+            resp.setToLocationName(log.getToType() == 0 ? "仓库" : "医院-" + log.getToId());
+            return resp;
         }).collect(Collectors.toList());
     }
 }

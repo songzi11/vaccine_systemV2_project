@@ -4,7 +4,14 @@ import com.tjut.edu.vaccine.common.exception.BusinessException;
 import java.util.List;
 import java.util.Map;
 
-public class AppointmentStatusMachine {
+/**
+ * 预约状态机（工具类，非枚举）
+ * <p>注：位于 enums 包以便与 AppointmentStatus 保持内聚，
+ * 如项目规模扩大建议迁移至独立的 statemachine 包。</p>
+ */
+public final class AppointmentStatusMachine {
+
+    private AppointmentStatusMachine() {}
 
     public static final List<Integer> IN_PROGRESS = List.of(
         AppointmentStatus.APPOINTED.getCode(),
@@ -18,11 +25,12 @@ public class AppointmentStatusMachine {
         AppointmentStatus.EXPIRED.getCode(),
         AppointmentStatus.PRECHECK_FAIL.getCode()
     );
+    /** 从枚举的 terminal 字段自动派生，单一数据源 */
     public static final List<Integer> ALL_TERMINAL = List.of(
-        AppointmentStatus.COMPLETED.getCode(),
-        AppointmentStatus.CANCELLED.getCode(),
-        AppointmentStatus.EXPIRED.getCode(),
-        AppointmentStatus.PRECHECK_FAIL.getCode()
+        java.util.Arrays.stream(AppointmentStatus.values())
+            .filter(AppointmentStatus::isTerminal)
+            .map(AppointmentStatus::getCode)
+            .toArray(Integer[]::new)
     );
 
     private static final Map<Integer, List<Integer>> TRANSITIONS = Map.of(
@@ -32,6 +40,7 @@ public class AppointmentStatusMachine {
             AppointmentStatus.SIGNED_IN.getCode()
         ),
         AppointmentStatus.SIGNED_IN.getCode(), List.of(
+            AppointmentStatus.CANCELLED.getCode(),
             AppointmentStatus.PRECHECK_PASS.getCode(),
             AppointmentStatus.PRECHECK_FAIL.getCode()
         ),

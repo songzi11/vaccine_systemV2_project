@@ -9,23 +9,13 @@ public class AppointmentConverter {
         if (po == null) {
             return null;
         }
-        Appointment appointment = new Appointment();
-        appointment.setId(po.getId());
-        appointment.setAppointmentNo(po.getAppointmentNo());
-        appointment.setUserId(po.getUserId());
-        appointment.setChildId(po.getChildId());
-        appointment.setVaccineId(po.getVaccineId());
-        appointment.setAppointmentDate(po.getAppointmentDate());
-        appointment.setTimeSlot(po.getTimeSlot());
-        appointment.setStatus(po.getStatus() != null ? po.getStatus() : 0);
-        appointment.setCurrentWindow(po.getCurrentWindow());
-        appointment.setSigninTime(po.getSigninTime());
-        appointment.setCancelTime(po.getCancelTime());
-        appointment.setCancelReason(po.getCancelReason());
-        appointment.setBatchId(po.getBatchId());
-        appointment.setCreateTime(po.getCreateTime());
-        appointment.setUpdateTime(po.getUpdateTime());
-        return appointment;
+        return Appointment.reconstruct(
+                po.getId(), po.getAppointmentNo(), po.getUserId(), po.getChildId(),
+                po.getVaccineId(), po.getAppointmentDate(), po.getTimeSlot(),
+                po.getStatus() != null ? po.getStatus() : 0, po.getCurrentWindow(),
+                po.getSigninTime(), po.getCancelTime(), po.getCancelReason(), po.getBatchId(),
+                po.getCreateTime(), po.getUpdateTime()
+        );
     }
 
     public static AppointmentPO toPO(Appointment appointment) {

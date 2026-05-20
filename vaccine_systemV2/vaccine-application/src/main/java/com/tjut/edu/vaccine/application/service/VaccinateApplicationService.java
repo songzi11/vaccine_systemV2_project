@@ -205,7 +205,7 @@ public class VaccinateApplicationService {
         return resp;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public FEFOBatchResponse findFEFOBatch(Long vaccineId) {
         VaccineBatch batch = vaccineBatchRepository.findAvailableForFEFO(vaccineId, defaultHospitalId);
         if (batch == null) {
