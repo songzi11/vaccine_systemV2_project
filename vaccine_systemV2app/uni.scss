@@ -1,0 +1,109 @@
+/* ==================== 疫苗管理系统V2 设计令牌 ==================== */
+
+/* ---------- 品牌色 ---------- */
+$color-primary: #07C160;
+$color-primary-light: #E8F8EF;
+$color-primary-dark: #06A955;
+
+/* ---------- 语义色 ---------- */
+$color-success: #07C160;
+$color-warning: #FF9900;
+$color-danger: #EE0A24;
+$color-info: #1989FA;
+
+/* 语义色浅色（用于标签/徽章背景） */
+$color-success-light: rgba(7, 193, 96, 0.1);
+$color-warning-light: rgba(255, 153, 0, 0.1);
+$color-danger-light: rgba(238, 10, 36, 0.1);
+$color-info-light: rgba(25, 137, 250, 0.1);
+
+/* ---------- 文字色 ---------- */
+$color-text-primary: #333333;
+$color-text-regular: #666666;
+$color-text-secondary: #999999;
+$color-text-placeholder: #C0C0C0;
+$color-text-white: #FFFFFF;
+
+/* ---------- 背景色 ---------- */
+$color-bg-page: #F5F5F5;
+$color-bg-white: #FFFFFF;
+$color-bg-grey: #F8F8F8;
+$color-bg-card: $color-bg-white;
+$color-bg-hover: #F1F1F1;
+$color-bg-mask: rgba(0, 0, 0, 0.4);
+
+/* ---------- 边框色 ---------- */
+$color-border: #E5E5E5;
+$color-border-light: #F0F0F0;
+
+/* ---------- 字体大小 ---------- */
+$font-size-xs: 22rpx;
+$font-size-sm: 24rpx;
+$font-size-base: 28rpx;
+$font-size-md: 30rpx;
+$font-size-lg: 32rpx;
+$font-size-xl: 36rpx;
+$font-size-xxl: 40rpx;
+$font-size-title: 48rpx;
+
+/* ---------- 字重 ---------- */
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 600;
+
+/* ---------- 间距 ---------- */
+$spacing-xs: 8rpx;
+$spacing-sm: 16rpx;
+$spacing-md: 24rpx;
+$spacing-lg: 32rpx;
+$spacing-xl: 48rpx;
+$spacing-base: $spacing-md;
+
+/* ---------- 圆角 ---------- */
+$border-radius-sm: 8rpx;
+$border-radius-md: 16rpx;
+$border-radius-lg: 24rpx;
+$border-radius-round: 999rpx;
+
+/* 圆角别名（兼容代码中使用 $radius-* 的地方） */
+$radius-sm: $border-radius-sm;
+$radius-md: $border-radius-md;
+$radius-lg: $border-radius-lg;
+$radius-round: $border-radius-round;
+$radius-pill: $border-radius-round;
+
+/* ---------- 阴影 ---------- */
+$shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+$shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+$shadow-lg: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
+$shadow-card: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+
+/* ---------- TabBar ---------- */
+$tabbar-height: 100rpx;
+$tabbar-color: #999999;
+$tabbar-active-color: #07C160;
+$tabbar-bg: #FFFFFF;
+$tabbar-icon-size: 48rpx;
+
+/* ---------- 预约状态色 ---------- */
+$status-appointed: #1989FA;
+$status-completed: #07C160;
+$status-cancelled: #999999;
+$status-expired: #999999;
+$status-signed-in: #FF9900;
+$status-precheck-pass: #FF9900;
+$status-registered: #FF9900;
+$status-precheck-fail: #EE0A24;
+$status-observing: #FF9900;
+
+/* ---------- 批次状态色 ---------- */
+$batch-normal: #07C160;
+$batch-near-expiry: #FF9900;
+$batch-expired: #EE0A24;
+$batch-disposed: #999999;
+
+/* ---------- 公告状态色 ---------- */
+$notice-pending: #FF9900;
+$notice-published: #07C160;
+$notice-taken-down: #999999;
+$notice-rejected: #EE0A24;

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.tjut.edu</groupId>
+        <artifactId>vaccine-system</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>vaccine-application</artifactId>
+    <name>vaccine-application</name>
+    <description>应用层：应用服务、DTO、Assembler、定时任务</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.tjut.edu</groupId>
+            <artifactId>vaccine-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tjut.edu</groupId>
+            <artifactId>vaccine-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tjut.edu</groupId>
+            <artifactId>vaccine-infrastructure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+</project>

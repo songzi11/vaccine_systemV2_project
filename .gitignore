@@ -1,0 +1,39 @@
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# Build output
+target/
+dist/
+build/
+
+# Node
+node_modules/
+
+# UniApp
+unpackage/
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Graphify / Obsidian (generated, not source)
+graphify-out/
+graphify-out-frontend/
+obsidian-backend/
+obsidian-frontend/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+.env
+.env.*
+
+# Python cache
+__pycache__/
+*.pyc
+.graphify_*

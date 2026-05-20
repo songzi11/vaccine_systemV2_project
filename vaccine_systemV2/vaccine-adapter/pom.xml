@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.tjut.edu</groupId>
+        <artifactId>vaccine-system</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>vaccine-adapter</artifactId>
+    <name>vaccine-adapter</name>
+    <description>适配层：Controller、全局异常处理、事件处理器</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.tjut.edu</groupId>
+            <artifactId>vaccine-application</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tjut.edu</groupId>
+            <artifactId>vaccine-infrastructure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+</project>

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(mkdir -p utils store hooks api static/tabbar static/icons)",
+      "Bash(mkdir -p components/CustomTabBar components/EmptyState components/StatusTag)",
+      "Bash(mkdir -p pages/auth pages/common pages/index pages/mine pages/child pages/appointment pages/vaccine pages/notice pages/record)",
+      "Bash(mkdir -p pages/queue pages/calling pages/stock pages/process)",
+      "Bash(mkdir -p pages/admin/schedule pages/admin/window pages/admin/vaccine pages/admin/notice pages/admin/role pages/admin/config pages/stats)"
+    ]
+  }
+}

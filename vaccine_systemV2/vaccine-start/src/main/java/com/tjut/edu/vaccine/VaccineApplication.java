@@ -1,0 +1,15 @@
+package com.tjut.edu.vaccine;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+@SpringBootApplication(scanBasePackages = "com.tjut.edu.vaccine")
+@MapperScan("com.tjut.edu.vaccine.infrastructure.persistence.mapper")
+@EnableScheduling
+public class VaccineApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(VaccineApplication.class, args);
+    }
+}

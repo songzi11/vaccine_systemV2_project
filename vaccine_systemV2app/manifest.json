@@ -1,0 +1,50 @@
+{
+    "name": "vaccine_systemV2app",
+    "appid": "__UNI__2324C6C",
+    "description": "疫苗管理系统V2前端应用",
+    "versionName": "1.0.0",
+    "versionCode": "100",
+    "transformPx": false,
+    "app-plus": {
+        "usingComponents": true,
+        "nvueCompiler": "uni-app",
+        "nvueStyleCompiler": "uni-app",
+        "compilerVersion": 3,
+        "nvueLaunchMode": "fast",
+        "splashscreen": {
+            "alwaysShowBeforeRender": true,
+            "waiting": true,
+            "autoclose": true,
+            "delay": 0
+        },
+        "modules": {},
+        "distribute": {
+            "android": {
+                "permissions": [
+                    "<uses-permission android:name=\"android.permission.INTERNET\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\"/>"
+                ]
+            },
+            "orientation": ["portrait-primary"]
+        }
+    },
+    "mp-weixin": {
+        "appid": "",
+        "setting": {
+            "urlCheck": false
+        },
+        "usingComponents": true
+    },
+    "h5": {
+        "template": "template.h5.html",
+        "router": {
+            "mode": "hash",
+            "base": ""
+        },
+        "async": {
+            "timeout": 20000
+        }
+    },
+    "vueVersion": "3"
+}

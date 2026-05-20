@@ -1,0 +1,71 @@
+package com.tjut.edu.vaccine.domain.observe.aggregate;
+
+import com.tjut.edu.vaccine.common.enums.ObserveResult;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+/**
+ * 留观记录聚合根
+ */
+@Getter
+@Setter
+public class ObserveRecord implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    private Long id;
+    private Long appointmentId;
+    private String injectionId;
+    private LocalDateTime startTime;
+    private LocalDateTime finishTime;
+    /**
+     * 留观时长(分钟)
+     */
+    private int duration;
+    private ObserveResult observeResult;
+    private Long doctorId;
+    private LocalDateTime createTime;
+
+    public ObserveRecord() {
+    }
+
+    public ObserveRecord(Long appointmentId, String injectionId, Long doctorId) {
+        if (appointmentId == null) {
+            throw new IllegalArgumentException("预约ID不能为空");
+        }
+        if (injectionId == null || injectionId.isBlank()) {
+            throw new IllegalArgumentException("接种编号不能为空");
+        }
+        this.appointmentId = appointmentId;
+        this.injectionId = injectionId;
+        this.doctorId = doctorId;
+        this.startTime = LocalDateTime.now();
+        this.observeResult = ObserveResult.NORMAL;
+        this.createTime = LocalDateTime.now();
+    }
+
+    /**
+     * 完成留观
+     */
+    public void finish(int durationMinutes) {
+        if (this.finishTime != null) {
+            throw new IllegalStateException("留观已结束，不可重复完成");
+        }
+        if (durationMinutes <= 0) {
+            throw new IllegalArgumentException("留观时长必须大于0");
+        }
+        this.finishTime = LocalDateTime.now();
+        this.duration = durationMinutes;
+    }
+
+    public boolean isFinished() {
+        return this.finishTime != null;
+    }
+
+    public void markAbnormal() {
+        this.observeResult = ObserveResult.ABNORMAL;
+    }
+}

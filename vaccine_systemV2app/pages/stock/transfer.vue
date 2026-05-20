@@ -1,0 +1,173 @@
+<template>
+  <view class="page">
+    <view class="nav-bar">
+      <uni-icons type="back" :size="20" @click="uni.navigateBack()" />
+      <text class="nav-title">库存调拨</text>
+    </view>
+
+    <!-- 批次信息（只读） -->
+    <view class="info-card">
+      <text class="card-title">批次信息</text>
+      <view class="info-row"><text class="info-label">批次号</text><text class="info-value">{{ batch.batchNo }}</text></view>
+      <view class="info-row"><text class="info-label">疫苗名称</text><text class="info-value">{{ batch.vaccineName }}</text></view>
+      <view class="info-row"><text class="info-label">总数</text><text class="info-value">{{ batch.totalStock }}</text></view>
+      <view class="info-row"><text class="info-label">可用数</text><text class="info-value">{{ batch.availableStock }}</text></view>
+      <view class="info-row"><text class="info-label">锁定数</text><text class="info-value">{{ batch.lockedStock }}</text></view>
+    </view>
+
+    <!-- 调拨表单 -->
+    <view class="section">
+      <text class="section-title">调拨信息</text>
+
+      <view class="form-item">
+        <text class="form-label">调出位置 *</text>
+        <picker :range="locationOptions" range-key="label" @change="onFromChange">
+          <view class="picker-value">
+            <text :class="{ placeholder: !form.fromLocation }">{{ fromLabel }}</text>
+            <uni-icons type="bottom" :size="14" color="#999" />
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">调入位置 *</text>
+        <picker :range="locationOptions" range-key="label" @change="onToChange">
+          <view class="picker-value">
+            <text :class="{ placeholder: !form.toLocation }">{{ toLabel }}</text>
+            <uni-icons type="bottom" :size="14" color="#999" />
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">调拨数量 *</text>
+        <uni-easyinput v-model="form.quantity" type="number" :placeholder="quantityPlaceholder" />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">备注</text>
+        <uni-easyinput v-model="form.remark" type="textarea" placeholder="选填" />
+      </view>
+    </view>
+
+    <!-- 操作 -->
+    <view class="bottom-bar">
+      <button class="btn-cancel" @click="uni.navigateBack()">取消</button>
+      <button class="btn-confirm" :loading="submitting" @click="handleSubmit">确认调拨</button>
+    </view>
+  </view>
+</template>
+
+<script setup>
+import { ref, reactive, computed } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
+import { getBatchDetail, createTransfer } from '@/api/stock.js'
+
+const batchId = ref('')
+const batch = ref({})
+const submitting = ref(false)
+
+const quantityPlaceholder = computed(() => `最大可用数: ${batch.value.availableStock || 0}`)
+
+const locationOptions = [
+  { label: '主仓库', value: 1 },
+  { label: '接种台1', value: 2 },
+  { label: '接种台2', value: 3 },
+  { label: '接种台3', value: 4 }
+]
+
+const form = reactive({
+  fromLocation: '',
+  toLocation: '',
+  quantity: '',
+  remark: ''
+})
+
+const fromLabel = computed(() => {
+  const found = locationOptions.find(l => l.value === form.fromLocation)
+  return found ? found.label : '请选择调出位置'
+})
+
+const toLabel = computed(() => {
+  const found = locationOptions.find(l => l.value === form.toLocation)
+  return found ? found.label : '请选择调入位置'
+})
+
+onLoad(async (query) => {
+  batchId.value = query.batchId || ''
+  try {
+    const data = await getBatchDetail(batchId.value)
+    batch.value = data || {}
+  } catch (e) {
+    console.error('加载批次信息失败', e)
+  }
+})
+
+function onFromChange(e) { form.fromLocation = locationOptions[e.detail.value]?.value || '' }
+function onToChange(e) { form.toLocation = locationOptions[e.detail.value]?.value || '' }
+
+async function handleSubmit() {
+  if (!form.fromLocation) { uni.showToast({ title: '请选择调出位置', icon: 'none' }); return }
+  if (!form.toLocation) { uni.showToast({ title: '请选择调入位置', icon: 'none' }); return }
+  if (form.fromLocation === form.toLocation) { uni.showToast({ title: '调出和调入位置不能相同', icon: 'none' }); return }
+  const qty = Number(form.quantity)
+  if (!qty || qty <= 0) { uni.showToast({ title: '请输入调拨数量', icon: 'none' }); return }
+  if (qty > (batch.value.availableStock || 0)) { uni.showToast({ title: '数量不能超过可用数', icon: 'none' }); return }
+
+  submitting.value = true
+  try {
+    await createTransfer({
+      batchId: Number(batchId.value),
+      fromType: 1,
+      fromId: form.fromLocation,
+      toType: 1,
+      toId: form.toLocation,
+      quantity: qty,
+      remark: form.remark
+    })
+    uni.showToast({ title: '调拨成功', icon: 'success' })
+    setTimeout(() => uni.navigateBack(), 1500)
+  } catch (e) {
+    uni.showToast({ title: e.message || '调拨失败', icon: 'none' })
+  } finally {
+    submitting.value = false
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.page { min-height: 100vh; padding: $spacing-lg; background: $color-bg-page; padding-bottom: 140rpx; }
+.nav-bar { display: flex; align-items: center; gap: $spacing-sm; margin-bottom: $spacing-lg; }
+.nav-title { font-size: $font-size-lg; font-weight: 600; }
+
+.info-card {
+  background: $color-bg-white; border-radius: $radius-lg; padding: $spacing-md;
+  margin-bottom: $spacing-md; box-shadow: $shadow-card;
+}
+.card-title { font-size: $font-size-base; font-weight: 600; display: block; margin-bottom: $spacing-sm; }
+.info-row { display: flex; justify-content: space-between; padding: $spacing-sm 0; }
+.info-label { font-size: $font-size-sm; color: $color-text-secondary; }
+.info-value { font-size: $font-size-base; color: $color-text-primary; }
+
+.section { background: $color-bg-white; border-radius: $radius-lg; padding: $spacing-md; margin-bottom: $spacing-md; }
+.section-title { font-size: $font-size-base; font-weight: 600; margin-bottom: $spacing-md; display: block; }
+.form-item { margin-bottom: $spacing-md; }
+.form-label { font-size: $font-size-sm; color: $color-text-secondary; margin-bottom: $spacing-xs; display: block; }
+
+.picker-value {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: $spacing-sm $spacing-md; border: 1rpx solid $color-border; border-radius: $radius-lg;
+  font-size: $font-size-base;
+  .placeholder { color: $color-text-placeholder; }
+}
+
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  background: #FFFFFF;
+}
+.btn-cancel { flex: 1; background: transparent; border: 1rpx solid $color-border; color: $color-text-secondary; border-radius: $radius-lg; height: 88rpx; line-height: 88rpx; }
+.btn-confirm { flex: 2; background: $color-primary; color: #FFF; border: none; border-radius: $radius-lg; height: 88rpx; line-height: 88rpx; }
+</style>
