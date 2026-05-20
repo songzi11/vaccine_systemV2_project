@@ -20,10 +20,10 @@ unpackage/
 .mvn/wrapper/maven-wrapper.jar
 
 # Graphify / Obsidian (generated, not source)
-graphify-out/
-graphify-out-frontend/
-obsidian-backend/
-obsidian-frontend/
+**/graphify-out/
+**/graphify-out-frontend/
+**/obsidian-backend/
+**/obsidian-frontend/
 
 # OS files
 .DS_Store
@@ -36,4 +36,11 @@ Thumbs.db
 # Python cache
 __pycache__/
 *.pyc
+.pytest_cache/
 .graphify_*
+
+# Claude local settings
+.claude/settings.local.json
+
+# Lock file (project uses pnpm)
+package-lock.json

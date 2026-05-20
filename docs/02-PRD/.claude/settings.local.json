@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ls -la \"D:/宋子嘉/大学/大四/毕业设计/vaccine_systemV2_project/docs/02-PRD/\"PRD-*.md)"
-    ]
-  }
-}

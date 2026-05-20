@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(cmd.exe /c \"where java\")",
-      "Bash(cmd.exe /c \"echo %JAVA_HOME%\")"
-    ]
-  }
-}
