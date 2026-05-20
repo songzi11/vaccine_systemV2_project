@@ -4,6 +4,7 @@ import com.tjut.edu.vaccine.application.dto.request.BatchCreateRequest;
 import com.tjut.edu.vaccine.application.dto.request.BatchDisposeRequest;
 import com.tjut.edu.vaccine.application.dto.request.StockTransferRequest;
 import com.tjut.edu.vaccine.application.dto.response.StockAlertResponse;
+import com.tjut.edu.vaccine.application.dto.response.StockTransferResponse;
 import com.tjut.edu.vaccine.application.dto.response.StockSummaryResponse;
 import com.tjut.edu.vaccine.application.dto.response.VaccineBatchResponse;
 import com.tjut.edu.vaccine.application.service.StockApplicationService;
@@ -70,7 +71,7 @@ public class StockController {
 
     @GetMapping("/transfer/records")
     @Operation(summary = "查看调拨记录")
-    public ApiResponse<List<java.util.Map<String, Object>>> findTransferRecords(
+    public ApiResponse<List<StockTransferResponse>> findTransferRecords(
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
             @RequestParam(required = false) String keyword,

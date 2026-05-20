@@ -16,6 +16,11 @@ public interface DoctorScheduleRepository {
 
     boolean existsConflict(Long doctorId, Long windowId, LocalDate scheduleDate, String timeSlot);
 
+    /**
+     * 检查同一医生在指定日期时段是否已有排班（不限窗口，防止同一时段排到不同窗口）
+     */
+    boolean existsDoctorTimeConflict(Long doctorId, LocalDate scheduleDate, String timeSlot, Long excludeScheduleId);
+
     void save(DoctorSchedule schedule);
 
     void update(DoctorSchedule schedule);

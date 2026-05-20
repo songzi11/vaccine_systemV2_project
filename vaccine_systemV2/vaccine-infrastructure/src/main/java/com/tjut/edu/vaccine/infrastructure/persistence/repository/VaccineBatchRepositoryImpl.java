@@ -64,8 +64,18 @@ public class VaccineBatchRepositoryImpl implements VaccineBatchRepository {
     public List<VaccineBatch> findByFilter(String status, Long vaccineId, String keyword) {
         LambdaQueryWrapper<VaccineBatchPO> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(status)) {
-            BatchStatus batchStatus = BatchStatus.valueOf(status);
-            wrapper.eq(VaccineBatchPO::getStatus, batchStatus.getCode());
+            try {
+                BatchStatus batchStatus = BatchStatus.valueOf(status);
+                wrapper.eq(VaccineBatchPO::getStatus, batchStatus.getCode());
+            } catch (IllegalArgumentException e) {
+                // 尝试按数字code匹配
+                try {
+                    int code = Integer.parseInt(status);
+                    wrapper.eq(VaccineBatchPO::getStatus, code);
+                } catch (NumberFormatException ignored) {
+                    // 无效的status参数，忽略过滤条件
+                }
+            }
         }
         if (vaccineId != null) {
             wrapper.eq(VaccineBatchPO::getVaccineId, vaccineId);

@@ -20,19 +20,21 @@ public class VaccineStockRepositoryImpl implements VaccineStockRepository {
 
     @Override
     public Optional<HospitalVaccineStock> findByBatchId(Long batchId) {
-        HospitalVaccineStockPO po = stockMapper.selectOne(
+        List<HospitalVaccineStockPO> list = stockMapper.selectList(
             new LambdaQueryWrapper<HospitalVaccineStockPO>()
                 .eq(HospitalVaccineStockPO::getBatchId, batchId));
-        return Optional.ofNullable(po).map(HospitalVaccineStockConverter::toDomain);
+        if (list.isEmpty()) return Optional.empty();
+        return Optional.of(HospitalVaccineStockConverter.toDomain(list.get(0)));
     }
 
     @Override
     public Optional<HospitalVaccineStock> findByBatchIdForUpdate(Long batchId) {
-        HospitalVaccineStockPO po = stockMapper.selectOne(
+        List<HospitalVaccineStockPO> list = stockMapper.selectList(
             new LambdaQueryWrapper<HospitalVaccineStockPO>()
                 .eq(HospitalVaccineStockPO::getBatchId, batchId)
                 .last("FOR UPDATE"));
-        return Optional.ofNullable(po).map(HospitalVaccineStockConverter::toDomain);
+        if (list.isEmpty()) return Optional.empty();
+        return Optional.of(HospitalVaccineStockConverter.toDomain(list.get(0)));
     }
 
     @Override
@@ -71,7 +73,31 @@ public class VaccineStockRepositoryImpl implements VaccineStockRepository {
 
     @Override
     public void addStock(Long batchId, int quantity) {
-        stockMapper.addStock(batchId, quantity);
+        int rows = stockMapper.addStock(batchId, quantity);
+        if (rows == 0) {
+            throw new RuntimeException("库存增加失败: batchId=" + batchId + "，目标批次不存在");
+        }
+    }
+
+    @Override
+    public void deductStockById(Long id, int quantity) {
+        int rows = stockMapper.deductStockById(id, quantity);
+        if (rows == 0) {
+            throw new RuntimeException("库存扣减失败: stockId=" + id + ", quantity=" + quantity);
+        }
+    }
+
+    @Override
+    public void addStockById(Long id, int quantity) {
+        int rows = stockMapper.addStockById(id, quantity);
+        if (rows == 0) {
+            throw new RuntimeException("库存增加失败: stockId=" + id);
+        }
+    }
+
+    @Override
+    public void zeroStockByBatchId(Long batchId) {
+        stockMapper.zeroStockByBatchId(batchId);
     }
 
     @Override

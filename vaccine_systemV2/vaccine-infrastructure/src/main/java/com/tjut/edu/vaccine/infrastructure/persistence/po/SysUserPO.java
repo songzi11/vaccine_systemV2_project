@@ -34,6 +34,8 @@ public class SysUserPO {
 
     private LocalDateTime freezeEndTime;
 
+    private String freezeReason;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 

@@ -83,7 +83,12 @@ public class ScheduleApplicationService {
 
     @Transactional
     public ScheduleResponse createSchedule(ScheduleCreateRequest req) {
-        // 1. 验证冲突
+        // 1. 验证同一医生同一时段不能排到不同窗口
+        if (doctorScheduleRepository.existsDoctorTimeConflict(
+                req.getDoctorId(), req.getScheduleDate(), req.getTimeSlot(), null)) {
+            throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT);
+        }
+        // 2. 验证同一窗口同一时段不重复排班
         if (doctorScheduleRepository.existsConflict(
                 req.getDoctorId(), req.getWindowId(), req.getScheduleDate(), req.getTimeSlot())) {
             throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT);
@@ -113,6 +118,11 @@ public class ScheduleApplicationService {
             schedule.setMaxCapacity(req.getMaxCapacity());
         }
         if (req.getTimeSlot() != null) {
+            // 修改时段时需要重新校验冲突
+            if (doctorScheduleRepository.existsDoctorTimeConflict(
+                    schedule.getDoctorId(), schedule.getScheduleDate(), req.getTimeSlot(), id)) {
+                throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT);
+            }
             schedule.setTimeSlot(req.getTimeSlot());
         }
         doctorScheduleRepository.update(schedule);

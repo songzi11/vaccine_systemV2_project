@@ -135,23 +135,11 @@ public class AppointmentApplicationService {
     public void cancel(Long appointmentId, AppointmentCancelRequest req) {
         Long userId = securityContextPort.getCurrentUserId();
 
-        // 1. 查找预约
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.APPOINT_NOT_FOUND));
-
-        // 2. 验证所有权
-        if (!appointment.getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.APPOINT_NOT_OWN);
+        // 1. 查找预约（加行锁防止并发取消导致库存双倍释放）
+        Appointment appointment = appointmentRepository.findByIdForUpdate(appointmentId);
+        if (appointment == null) {
+            throw new BusinessException(ErrorCode.APPOINT_NOT_FOUND);
         }
-
-        // 3. 验证可取消状态
-        if (!appointment.isCancellable()) {
-            throw new BusinessException(ErrorCode.APPOINT_CANCEL_FORBIDDEN);
-        }
-
-        // 4. 执行取消
-        appointment.cancel(req.getReason());
-        appointmentRepository.updateStatus(appointment);
 
         // 5. 释放已锁定的库存（如果已分配批次）
         if (appointment.getBatchId() != null) {
@@ -166,7 +154,7 @@ public class AppointmentApplicationService {
     @Transactional(readOnly = true)
     public List<AppointmentResponse> findByUserId(Integer status) {
         Long userId = securityContextPort.getCurrentUserId();
-        List<Appointment> appointments = appointmentRepository.findByUserId(userId, status, 1, 100);
+        List<Appointment> appointments = appointmentRepository.findByUserId(userId, status, 1, 500);
         return appointments.stream().map(this::enrichAppointmentResponse).collect(Collectors.toList());
     }
 

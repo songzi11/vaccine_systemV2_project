@@ -96,13 +96,8 @@ public class ObserveApplicationService {
 
         ObserveRecord record = existingRecord.orElseGet(() -> createObserveRecordFromVaccination(id));
 
-        // 4. 验证留观时长
-        if (req.getDurationMinutes() < MIN_OBSERVE_MINUTES) {
-            throw new BusinessException(ErrorCode.OBSERVE_TIME_INSUFFICIENT);
-        }
-
-        // 5. 完成留观
-        record.finish(req.getDurationMinutes());
+        // 4. 完成留观（服务端自动计算实际经过时长）
+        record.finish();
 
         // 6. 如果异常，检查是否已上报不良反应
         if (record.getObserveResult() == ObserveResult.ABNORMAL) {

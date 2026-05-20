@@ -53,6 +53,27 @@ public interface HospitalVaccineStockMapper extends BaseMapper<HospitalVaccineSt
     int addStock(@Param("batchId") Long batchId, @Param("quantity") int quantity);
 
     /**
+     * 按行ID扣减可用库存（调拨专用）
+     */
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock - #{quantity} " +
+            "WHERE id = #{id} AND available_stock >= #{quantity}")
+    int deductStockById(@Param("id") Long id, @Param("quantity") int quantity);
+
+    /**
+     * 按行ID增加可用库存（调拨专用）
+     */
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity} " +
+            "WHERE id = #{id}")
+    int addStockById(@Param("id") Long id, @Param("quantity") int quantity);
+
+    /**
+     * 按行ID清零库存（销毁专用）
+     */
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = 0, locked_stock = 0 " +
+            "WHERE batch_id = #{batchId}")
+    int zeroStockByBatchId(@Param("batchId") Long batchId);
+
+    /**
      * 可用库存 = SUM(available_stock)
      */
     @Select("SELECT COALESCE(SUM(s.available_stock), 0) FROM hospital_vaccine_stock s " +

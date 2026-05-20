@@ -26,6 +26,12 @@ public interface VaccineStockRepository {
 
     void addStock(Long batchId, int quantity);
 
+    void deductStockById(Long id, int quantity);
+
+    void addStockById(Long id, int quantity);
+
+    void zeroStockByBatchId(Long batchId);
+
     Optional<HospitalVaccineStock> findByLocation(Long batchId, Integer locationType, Long locationId);
 
     void save(HospitalVaccineStock stock);

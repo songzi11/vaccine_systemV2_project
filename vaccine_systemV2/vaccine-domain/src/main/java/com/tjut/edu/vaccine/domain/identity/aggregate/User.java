@@ -78,10 +78,14 @@ public class User implements Serializable {
      * 判断是否允许预约
      */
     public boolean isAppointmentAllowed() {
-        if (status != UserStatus.NORMAL) {
+        if (status == UserStatus.FROZEN) {
+            // 爽约冻结到期后自动恢复预约能力
+            if (freezeEndTime != null && !freezeEndTime.isAfter(LocalDateTime.now())) {
+                return true;
+            }
             return false;
         }
-        if (freezeEndTime != null && freezeEndTime.isAfter(LocalDateTime.now())) {
+        if (status != UserStatus.NORMAL) {
             return false;
         }
         return true;

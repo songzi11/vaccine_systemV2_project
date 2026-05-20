@@ -217,10 +217,10 @@ public class StockApplicationService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_TRANSFER_FAILED));
         }
 
-        // 5. 来源扣减 + 目标增加
+        // 5. 来源扣减 + 目标增加（按行ID精确操作）
         try {
-            vaccineStockRepository.deductStock(fromStock.getId(), req.getQuantity());
-            vaccineStockRepository.addStock(toStock.getId(), req.getQuantity());
+            vaccineStockRepository.deductStockById(fromStock.getId(), req.getQuantity());
+            vaccineStockRepository.addStockById(toStock.getId(), req.getQuantity());
         } catch (RuntimeException e) {
             log.error("库存调拨失败: batchId={}, quantity={}", req.getBatchId(), req.getQuantity(), e);
             throw new BusinessException(ErrorCode.STOCK_TRANSFER_FAILED);
@@ -236,8 +236,6 @@ public class StockApplicationService {
         log.info("库存调拨成功: transferNo={}, batchId={}, from={}/{}, to={}/{}, quantity={}",
                 transferNo, req.getBatchId(), req.getFromType(), req.getFromId(),
                 req.getToType(), req.getToId(), req.getQuantity());
-
-        log.info("库存调拨成功: transferNo={}, batchId={}, quantity={}", transferNo, req.getBatchId(), req.getQuantity());
     }
 
     @Transactional
@@ -262,6 +260,9 @@ public class StockApplicationService {
         // 3. 更新批次状态
         batch.dispose();
         vaccineBatchRepository.updateStatus(batch);
+
+        // 4. 清零该批次的所有库存记录
+        vaccineStockRepository.zeroStockByBatchId(batchId);
 
         log.info("批次销毁成功: disposeNo={}, batchId={}, quantity={}", disposeNo, batchId, req.getQuantity());
     }

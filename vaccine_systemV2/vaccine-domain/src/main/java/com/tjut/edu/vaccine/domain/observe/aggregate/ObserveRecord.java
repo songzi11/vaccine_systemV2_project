@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
@@ -48,17 +49,19 @@ public class ObserveRecord implements Serializable {
     }
 
     /**
-     * 完成留观
+     * 完成留观（服务端自动计算实际时长）
      */
-    public void finish(int durationMinutes) {
+    public void finish() {
         if (this.finishTime != null) {
             throw new IllegalStateException("留观已结束，不可重复完成");
         }
-        if (durationMinutes <= 0) {
-            throw new IllegalArgumentException("留观时长必须大于0");
+        LocalDateTime now = LocalDateTime.now();
+        long actualMinutes = Duration.between(this.startTime, now).toMinutes();
+        if (actualMinutes <= 0) {
+            actualMinutes = 1;
         }
-        this.finishTime = LocalDateTime.now();
-        this.duration = durationMinutes;
+        this.finishTime = now;
+        this.duration = (int) actualMinutes;
     }
 
     public boolean isFinished() {

@@ -26,6 +26,7 @@ public class UserConverter {
         user.setNoShowCount(po.getNoShowCount() != null ? po.getNoShowCount() : 0);
         user.setFreezeStartTime(po.getFreezeStartTime());
         user.setFreezeEndTime(po.getFreezeEndTime());
+        user.setFreezeReason(po.getFreezeReason());
         user.setCreateTime(po.getCreateTime());
         user.setUpdateTime(po.getUpdateTime());
         return user;
@@ -50,6 +51,7 @@ public class UserConverter {
         po.setNoShowCount(user.getNoShowCount());
         po.setFreezeStartTime(user.getFreezeStartTime());
         po.setFreezeEndTime(user.getFreezeEndTime());
+        po.setFreezeReason(user.getFreezeReason());
         po.setCreateTime(user.getCreateTime());
         po.setUpdateTime(user.getUpdateTime());
         return po;

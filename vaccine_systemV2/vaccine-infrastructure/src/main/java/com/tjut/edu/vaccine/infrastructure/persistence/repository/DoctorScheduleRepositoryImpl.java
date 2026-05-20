@@ -57,6 +57,19 @@ public class DoctorScheduleRepositoryImpl implements DoctorScheduleRepository {
     }
 
     @Override
+    public boolean existsDoctorTimeConflict(Long doctorId, LocalDate scheduleDate, String timeSlot, Long excludeScheduleId) {
+        LambdaQueryWrapper<DoctorSchedulePO> wrapper = new LambdaQueryWrapper<DoctorSchedulePO>()
+            .eq(DoctorSchedulePO::getDoctorId, doctorId)
+            .eq(DoctorSchedulePO::getScheduleDate, scheduleDate)
+            .eq(DoctorSchedulePO::getTimeSlot, timeSlot);
+        if (excludeScheduleId != null) {
+            wrapper.ne(DoctorSchedulePO::getId, excludeScheduleId);
+        }
+        Long count = doctorScheduleMapper.selectCount(wrapper);
+        return count != null && count > 0;
+    }
+
+    @Override
     public void save(DoctorSchedule schedule) {
         doctorScheduleMapper.insert(DoctorScheduleConverter.toPO(schedule));
     }
