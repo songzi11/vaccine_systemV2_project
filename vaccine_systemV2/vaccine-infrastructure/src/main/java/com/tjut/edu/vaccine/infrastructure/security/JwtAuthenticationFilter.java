@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,6 +68,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             UserContext.setUserId(userId);
             UserContext.setRoles(roles);
+            MDC.put("userId", String.valueOf(userId));
+            MDC.put("roles", String.join(",", roles));
 
             List<SimpleGrantedAuthority> authorities = roles.stream()
                     .map(role -> new SimpleGrantedAuthority("ROLE_" + role))

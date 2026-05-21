@@ -25,9 +25,12 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final TraceIdFilter traceIdFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(TraceIdFilter traceIdFilter,
+                          JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.traceIdFilter = traceIdFilter;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
@@ -89,6 +92,7 @@ public class SecurityConfig {
                     response.getWriter().write("{\"code\":1003,\"message\":\"无权限访问该资源\",\"data\":null}");
                 })
             )
+            .addFilterBefore(traceIdFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

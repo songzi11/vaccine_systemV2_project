@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- =============================================================== -->
+    <!--  PROPERTY DEFINITIONS                                           -->
+    <!-- =============================================================== -->
+    <property name="LOG_PATH" value="${LOG_PATH:-./logs}"/>
+    <property name="LOG_PATTERN_CONSOLE"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%5level) [%clr(%X{traceId:-N/A}){magenta}] [%15.15thread] %clr(%-40.40logger{39}){cyan} : %msg%n%wEx"/>
+    <property name="LOG_PATTERN_FILE"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{traceId}] [%X{userId}] [%X{roles}] [%thread] %logger{36} : %msg%n%wEx"/>
+    <property name="MAX_HISTORY" value="30"/>
+    <property name="MAX_FILE_SIZE" value="10MB"/>
+    <property name="TOTAL_SIZE_CAP" value="1GB"/>
+
+    <!-- =============================================================== -->
+    <!--  DEV PROFILE: Console only, colored, human-readable             -->
+    <!-- =============================================================== -->
+    <springProfile name="dev">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${LOG_PATTERN_CONSOLE}</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <!-- =============================================================== -->
+    <!--  NON-DEV PROFILE: Console + Rolling File + Error-only File      -->
+    <!-- =============================================================== -->
+    <springProfile name="!dev">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${LOG_PATTERN_FILE}</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/application.log</file>
+            <encoder>
+                <pattern>${LOG_PATTERN_FILE}</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_PATH}/application.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+                <maxHistory>${MAX_HISTORY}</maxHistory>
+                <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+            </rollingPolicy>
+        </appender>
+
+        <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/application-error.log</file>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>ERROR</level>
+            </filter>
+            <encoder>
+                <pattern>${LOG_PATTERN_FILE}</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_PATH}/application-error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+                <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+                <maxHistory>${MAX_HISTORY}</maxHistory>
+                <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+            </rollingPolicy>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+
+    <!-- =============================================================== -->
+    <!--  PACKAGE-LEVEL LOG LEVELS (shared across all profiles)          -->
+    <!-- =============================================================== -->
+    <logger name="com.tjut.edu.vaccine" level="INFO"/>
+
+    <!-- Framework noise reduction -->
+    <logger name="com.baomidou.mybatisplus" level="WARN"/>
+    <logger name="org.mybatis" level="WARN"/>
+    <logger name="org.apache.ibatis" level="WARN"/>
+
+    <!-- Mapper SQL logging: set to DEBUG to see SQL statements -->
+    <logger name="com.tjut.edu.vaccine.infrastructure.persistence.mapper" level="WARN"/>
+
+    <!-- Spring ecosystem -->
+    <logger name="org.springframework.security" level="INFO"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.boot" level="INFO"/>
+    <logger name="org.springframework.scheduling" level="INFO"/>
+    <logger name="org.springframework.data.redis" level="WARN"/>
+
+    <!-- Connection pool -->
+    <logger name="com.zaxxer.hikari" level="INFO"/>
+
+    <!-- API docs -->
+    <logger name="com.github.xiaoymin.knife4j" level="WARN"/>
+    <logger name="org.springdoc" level="WARN"/>
+
+    <!-- Ensure async log writes are flushed on shutdown -->
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+</configuration>

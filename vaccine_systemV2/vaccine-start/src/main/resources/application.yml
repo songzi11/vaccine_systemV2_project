@@ -24,7 +24,6 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       id-type: auto
@@ -46,8 +45,3 @@ jwt:
 
 vaccine:
   default-hospital-id: 1
-
-logging:
-  level:
-    com.tjut.edu.vaccine: debug
-    com.baomidou.mybatisplus: debug
