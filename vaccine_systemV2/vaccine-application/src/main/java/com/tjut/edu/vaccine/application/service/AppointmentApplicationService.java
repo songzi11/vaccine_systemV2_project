@@ -76,13 +76,11 @@ public class AppointmentApplicationService {
     public AppointmentResponse book(AppointmentBookRequest req) {
         Long userId = securityContextPort.getCurrentUserId();
 
-        // 1. 验证用户预约资格
+        // 0. 预校验快捷失败（无需抢锁）
         User user = userRepository.findById(userId);
         if (user == null || !user.isAppointmentAllowed()) {
             throw new BusinessException(ErrorCode.USER_FROZEN_LOGIN);
         }
-
-        // 2. 验证儿童归属
         ChildProfile child = childProfileRepository.findById(req.getChildId());
         if (child == null) {
             throw new BusinessException(ErrorCode.APPOINT_CHILD_NOT_FOUND);
@@ -90,57 +88,57 @@ public class AppointmentApplicationService {
         if (!Objects.equals(child.getParentId(), userId)) {
             throw new BusinessException(ErrorCode.APPOINT_CHILD_NOT_OWN);
         }
-
-        // 3. 验证疫苗状态
         Vaccine vaccine = vaccineRepository.findById(req.getVaccineId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.APPOINT_VACCINE_OFF_SHELF));
         if (!vaccine.isOnShelf()) {
             throw new BusinessException(ErrorCode.APPOINT_VACCINE_OFF_SHELF);
         }
 
-        // 4. 验证预约日期
-        LocalDate today = LocalDate.now();
-        int advanceDays = getConfigInt(CONFIG_ADVANCE_DAYS, DEFAULT_ADVANCE_DAYS);
-        if (req.getAppointmentDate().isBefore(today) ||
-                req.getAppointmentDate().isAfter(today.plusDays(advanceDays))) {
-            throw new BusinessException(ErrorCode.APPOINT_DATE_INVALID);
-        }
-
-        // 5. 验证时段容量
-        int currentCount = appointmentRepository.countBySlotForUpdate(
-                req.getVaccineId(), req.getAppointmentDate(), req.getTimeSlot());
-        int maxCapacity = getConfigInt(CONFIG_MAX_CAPACITY, DEFAULT_MAX_CAPACITY);
-        if (currentCount >= maxCapacity) {
+        // 1. 获取时段级分布式锁（MySQL GET_LOCK），防止并发超订
+        String slotLock = "book:" + req.getVaccineId() + ":" + req.getAppointmentDate() + ":" + req.getTimeSlot();
+        if (!appointmentRepository.acquireSlotLock(slotLock, 10)) {
             throw new BusinessException(ErrorCode.APPOINT_SLOT_FULL);
         }
+        try {
+            // 2. 验证预约日期
+            LocalDate today = LocalDate.now();
+            int advanceDays = getConfigInt(CONFIG_ADVANCE_DAYS, DEFAULT_ADVANCE_DAYS);
+            if (req.getAppointmentDate().isBefore(today) ||
+                    req.getAppointmentDate().isAfter(today.plusDays(advanceDays))) {
+                throw new BusinessException(ErrorCode.APPOINT_DATE_INVALID);
+            }
 
-        // 6. 验证重复预约
-        if (appointmentRepository.existsDuplicate(
-                req.getChildId(), req.getVaccineId(), req.getAppointmentDate())) {
-            throw new BusinessException(ErrorCode.APPOINT_DUPLICATE);
+            // 3. 验证时段容量
+            int currentCount = appointmentRepository.countBySlotForUpdate(
+                    req.getVaccineId(), req.getAppointmentDate(), req.getTimeSlot());
+            int maxCapacity = getConfigInt(CONFIG_MAX_CAPACITY, DEFAULT_MAX_CAPACITY);
+            if (currentCount >= maxCapacity) {
+                throw new BusinessException(ErrorCode.APPOINT_SLOT_FULL);
+            }
+
+            // 4. 验证重复预约
+            if (appointmentRepository.existsDuplicate(
+                    req.getChildId(), req.getVaccineId(), req.getAppointmentDate())) {
+                throw new BusinessException(ErrorCode.APPOINT_DUPLICATE);
+            }
+
+            // 5. 创建预约
+            Appointment appointment = Appointment.create(
+                    userId, req.getChildId(), req.getVaccineId(),
+                    req.getAppointmentDate(), req.getTimeSlot());
+
+            // 6. 生成预约编号并保存
+            String appointmentNo = appointmentRepository.generateAppointmentNo(req.getAppointmentDate());
+            appointment.setAppointmentNo(appointmentNo);
+            appointmentRepository.save(appointment);
+
+            log.info("预约创建成功: userId={}, appointmentNo={}, childId={}, vaccineId={}",
+                    userId, appointmentNo, req.getChildId(), req.getVaccineId());
+
+            return AppointmentAssembler.toResponse(appointment);
+        } finally {
+            appointmentRepository.releaseSlotLock(slotLock);
         }
-
-        // 7. 创建预约
-        Appointment appointment = Appointment.create(
-                userId, req.getChildId(), req.getVaccineId(),
-                req.getAppointmentDate(), req.getTimeSlot());
-
-        // 8. 生成预约编号并保存
-        String appointmentNo = appointmentRepository.generateAppointmentNo(req.getAppointmentDate());
-        appointment.setAppointmentNo(appointmentNo);
-        appointmentRepository.save(appointment);
-
-        // 9. 插入后二次验证容量（防止并发插入超限）
-        int postInsertCount = appointmentRepository.countBySlotForUpdate(
-                req.getVaccineId(), req.getAppointmentDate(), req.getTimeSlot());
-        if (postInsertCount > maxCapacity) {
-            throw new BusinessException(ErrorCode.APPOINT_SLOT_FULL);
-        }
-
-        log.info("预约创建成功: userId={}, appointmentNo={}, childId={}, vaccineId={}",
-                userId, appointmentNo, req.getChildId(), req.getVaccineId());
-
-        return AppointmentAssembler.toResponse(appointment);
     }
 
     @Transactional

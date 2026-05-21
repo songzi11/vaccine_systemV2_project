@@ -27,4 +27,10 @@ public interface AppointmentMapper extends BaseMapper<AppointmentPO> {
 
     @Select("SELECT status, COUNT(*) AS cnt FROM appointment WHERE appointment_date = #{date} GROUP BY status")
     List<Map<String, Object>> countGroupByStatus(@Param("date") LocalDate date);
+
+    @Select("SELECT GET_LOCK(#{lockName}, #{timeout})")
+    Integer getLock(@Param("lockName") String lockName, @Param("timeout") int timeout);
+
+    @Select("SELECT RELEASE_LOCK(#{lockName})")
+    Integer releaseLock(@Param("lockName") String lockName);
 }

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +53,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         po.setCancelTime(appointment.getCancelTime());
         po.setCancelReason(appointment.getCancelReason());
         po.setBatchId(appointment.getBatchId());
+        po.setUpdateTime(LocalDateTime.now());
         appointmentMapper.updateById(po);
     }
 
@@ -169,15 +171,40 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     @Override
     public String generateAppointmentNo(LocalDate date) {
         String prefix = "APT" + date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        LambdaQueryWrapper<AppointmentPO> wrapper = new LambdaQueryWrapper<AppointmentPO>()
-            .likeRight(AppointmentPO::getAppointmentNo, prefix)
-            .orderByDesc(AppointmentPO::getAppointmentNo)
-            .last("LIMIT 1 FOR UPDATE");
-        AppointmentPO last = appointmentMapper.selectOne(wrapper);
-        int seq = 1;
-        if (last != null && last.getAppointmentNo().length() > prefix.length()) {
-            seq = Integer.parseInt(last.getAppointmentNo().substring(prefix.length())) + 1;
+        // 使用 MySQL GET_LOCK 防止并发产生相同编号
+        String lockName = "appt_no:" + prefix;
+        Integer locked = appointmentMapper.getLock(lockName, 5);
+        if (locked == null || locked != 1) {
+            throw new RuntimeException("获取预约编号锁超时");
         }
-        return prefix + String.format("%04d", seq);
+        try {
+            LambdaQueryWrapper<AppointmentPO> wrapper = new LambdaQueryWrapper<AppointmentPO>()
+                .likeRight(AppointmentPO::getAppointmentNo, prefix)
+                .orderByDesc(AppointmentPO::getAppointmentNo)
+                .last("LIMIT 1");
+            AppointmentPO last = appointmentMapper.selectOne(wrapper);
+            int seq = 1;
+            if (last != null && last.getAppointmentNo().length() > prefix.length()) {
+                try {
+                    seq = Integer.parseInt(last.getAppointmentNo().substring(prefix.length())) + 1;
+                } catch (NumberFormatException e) {
+                    // 解析失败，使用默认序号
+                }
+            }
+            return prefix + String.format("%04d", seq);
+        } finally {
+            appointmentMapper.releaseLock(lockName);
+        }
+    }
+
+    @Override
+    public boolean acquireSlotLock(String lockName, int timeoutSeconds) {
+        Integer result = appointmentMapper.getLock(lockName, timeoutSeconds);
+        return result != null && result == 1;
+    }
+
+    @Override
+    public void releaseSlotLock(String lockName) {
+        appointmentMapper.releaseLock(lockName);
     }
 }

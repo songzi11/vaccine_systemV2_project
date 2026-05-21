@@ -41,4 +41,8 @@ public interface AppointmentRepository {
     List<Appointment> findByStatuses(List<Integer> statuses, LocalDate date);
 
     Map<Integer, Integer> countGroupByStatus(LocalDate date);
+
+    boolean acquireSlotLock(String lockName, int timeoutSeconds);
+
+    void releaseSlotLock(String lockName);
 }

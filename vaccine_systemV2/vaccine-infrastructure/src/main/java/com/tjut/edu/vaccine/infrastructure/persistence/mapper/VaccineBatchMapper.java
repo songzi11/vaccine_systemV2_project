@@ -16,7 +16,7 @@ public interface VaccineBatchMapper extends BaseMapper<VaccineBatchPO> {
             "JOIN hospital_vaccine_stock s ON b.id = s.batch_id " +
             "WHERE b.vaccine_id = #{vaccineId} " +
             "AND s.hospital_id = #{hospitalId} " +
-            "AND b.status = 0 " +
+            "AND b.status IN (0, 1) " +
             "AND s.available_stock > 0 " +
             "AND b.expiry_date > CURDATE() " +
             "ORDER BY b.expiry_date ASC LIMIT 1 FOR UPDATE")

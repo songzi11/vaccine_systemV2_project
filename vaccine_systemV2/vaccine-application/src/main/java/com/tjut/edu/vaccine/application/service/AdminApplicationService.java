@@ -443,10 +443,11 @@ public class AdminApplicationService {
     @Transactional
     public VerifyCodeResponse generateVerifyCode() {
         Long adminId = securityContextPort.getCurrentUserId();
-        String code = String.format("%06d", new java.util.Random().nextInt(1000000));
+        java.security.SecureRandom random = new java.security.SecureRandom();
+        String code = String.format("%06d", random.nextInt(1000000));
         int retries = 0;
-        while (verifyCodeRepository.findByCode(code) != null && retries < 10) {
-            code = String.format("%06d", new java.util.Random().nextInt(1000000));
+        while (verifyCodeRepository.findByCode(code) != null && retries < 20) {
+            code = String.format("%06d", random.nextInt(1000000));
             retries++;
         }
         VerifyCode vc = new VerifyCode();
