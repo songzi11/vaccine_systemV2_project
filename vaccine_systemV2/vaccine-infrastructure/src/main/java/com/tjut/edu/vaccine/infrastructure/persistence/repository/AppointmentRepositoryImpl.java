@@ -65,9 +65,14 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         List<Map<String, Object>> rows = appointmentMapper.countGroupBySlot(vaccineId, date);
         Map<String, Integer> result = new HashMap<>();
         for (Map<String, Object> row : rows) {
+            // MySQL JDBC driver may return the alias or the original column name
+            // depending on driver version and useOldAliasMetadataBehavior setting
             String slot = (String) row.get("timeSlot");
+            if (slot == null) {
+                slot = (String) row.get("time_slot");
+            }
             Number cnt = (Number) row.get("cnt");
-            if (slot != null) {
+            if (slot != null && cnt != null) {
                 result.put(slot, cnt.intValue());
             }
         }
