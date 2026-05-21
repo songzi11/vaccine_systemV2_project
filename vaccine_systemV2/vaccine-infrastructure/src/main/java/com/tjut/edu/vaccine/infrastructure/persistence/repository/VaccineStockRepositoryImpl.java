@@ -136,9 +136,7 @@ public class VaccineStockRepositoryImpl implements VaccineStockRepository {
     public List<HospitalVaccineStock> findAllWithStock() {
         List<HospitalVaccineStockPO> list = stockMapper.selectList(
             new LambdaQueryWrapper<HospitalVaccineStockPO>()
-                .gt(HospitalVaccineStockPO::getAvailableStock, 0)
-                .or()
-                .gt(HospitalVaccineStockPO::getLockedStock, 0));
+                .gt(HospitalVaccineStockPO::getTotalStock, 0));
         return list.stream().map(HospitalVaccineStockConverter::toDomain).toList();
     }
 

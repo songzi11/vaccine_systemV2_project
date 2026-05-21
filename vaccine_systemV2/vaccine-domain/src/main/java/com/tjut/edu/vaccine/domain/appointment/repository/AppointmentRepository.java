@@ -45,4 +45,6 @@ public interface AppointmentRepository {
     boolean acquireSlotLock(String lockName, int timeoutSeconds);
 
     void releaseSlotLock(String lockName);
+
+    int countExpiredByUserInMonth(Long userId, LocalDate startOfMonth, LocalDate today);
 }

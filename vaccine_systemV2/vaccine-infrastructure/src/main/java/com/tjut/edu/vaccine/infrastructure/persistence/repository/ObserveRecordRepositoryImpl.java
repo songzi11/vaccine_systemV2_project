@@ -9,6 +9,7 @@ import com.tjut.edu.vaccine.infrastructure.persistence.po.ObserveRecordPO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,5 +60,14 @@ public class ObserveRecordRepositoryImpl implements ObserveRecordRepository {
     @Override
     public void update(ObserveRecord record) {
         observeRecordMapper.updateById(ObserveRecordConverter.toPO(record));
+    }
+
+    @Override
+    public List<ObserveRecord> findUnfinishedBefore(LocalDateTime threshold) {
+        List<ObserveRecordPO> list = observeRecordMapper.selectList(
+            new LambdaQueryWrapper<ObserveRecordPO>()
+                .isNull(ObserveRecordPO::getFinishTime)
+                .le(ObserveRecordPO::getStartTime, threshold));
+        return list.stream().map(ObserveRecordConverter::toDomain).toList();
     }
 }

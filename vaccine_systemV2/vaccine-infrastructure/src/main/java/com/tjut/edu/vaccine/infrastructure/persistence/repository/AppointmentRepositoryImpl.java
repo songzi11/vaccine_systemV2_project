@@ -109,7 +109,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         List<AppointmentPO> list = appointmentMapper.selectList(
             new LambdaQueryWrapper<AppointmentPO>()
                 .eq(AppointmentPO::getStatus, AppointmentStatus.APPOINTED.getCode())
-                .le(AppointmentPO::getAppointmentDate, date)
+                .lt(AppointmentPO::getAppointmentDate, date)
         );
         return list.stream().map(AppointmentConverter::toDomain).toList();
     }
@@ -213,5 +213,16 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     @Override
     public void releaseSlotLock(String lockName) {
         appointmentMapper.releaseLock(lockName);
+    }
+
+    @Override
+    public int countExpiredByUserInMonth(Long userId, LocalDate startOfMonth, LocalDate today) {
+        Long count = appointmentMapper.selectCount(
+            new LambdaQueryWrapper<AppointmentPO>()
+                .eq(AppointmentPO::getUserId, userId)
+                .eq(AppointmentPO::getStatus, AppointmentStatus.EXPIRED.getCode())
+                .ge(AppointmentPO::getAppointmentDate, startOfMonth)
+                .lt(AppointmentPO::getAppointmentDate, today.plusDays(1)));
+        return count != null ? count.intValue() : 0;
     }
 }

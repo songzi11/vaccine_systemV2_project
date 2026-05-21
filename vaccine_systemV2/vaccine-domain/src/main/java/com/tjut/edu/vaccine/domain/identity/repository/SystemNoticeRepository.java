@@ -18,4 +18,6 @@ public interface SystemNoticeRepository {
     void update(SystemNotice notice);
 
     void deleteById(Long id);
+
+    List<SystemNotice> findPersonalByUserId(Long userId);
 }

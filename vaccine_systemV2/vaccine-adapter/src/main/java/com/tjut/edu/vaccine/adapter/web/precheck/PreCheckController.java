@@ -1,6 +1,7 @@
 package com.tjut.edu.vaccine.adapter.web.precheck;
 
 import com.tjut.edu.vaccine.application.dto.request.PreCheckAssessRequest;
+import com.tjut.edu.vaccine.application.dto.request.SigninRequest;
 import com.tjut.edu.vaccine.application.dto.response.PreCheckRecordResponse;
 import com.tjut.edu.vaccine.application.dto.response.QueueItemResponse;
 import com.tjut.edu.vaccine.application.service.AppointmentApplicationService;
@@ -30,6 +31,12 @@ public class PreCheckController {
 
     private final PreCheckApplicationService preCheckApplicationService;
     private final AppointmentApplicationService appointmentApplicationService;
+
+    @PostMapping("/signin")
+    @Operation(summary = "签到（确认家长到场）")
+    public ApiResponse<QueueItemResponse> signin(@RequestBody @Valid SigninRequest req) {
+        return ApiResponse.success(appointmentApplicationService.signin(req));
+    }
 
     @PostMapping("/assess")
     @Operation(summary = "预检评估")

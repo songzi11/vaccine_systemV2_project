@@ -22,11 +22,10 @@ public interface HospitalVaccineStockMapper extends BaseMapper<HospitalVaccineSt
     int lockStock(@Param("batchId") Long batchId, @Param("hospitalId") Long hospitalId);
 
     /**
-     * 扣减库存（接种出库）：消耗已锁定库存，同时扣减总库存
+     * 扣减库存（接种出库）：消耗已锁定库存，total_stock 不变（代表初始入库量）
      */
     @Update("UPDATE hospital_vaccine_stock SET " +
-            "locked_stock = locked_stock - 1, " +
-            "total_stock = total_stock - 1 " +
+            "locked_stock = locked_stock - 1 " +
             "WHERE batch_id = #{batchId} AND hospital_id = #{hospitalId} AND locked_stock >= 1")
     int deductStock(@Param("batchId") Long batchId, @Param("hospitalId") Long hospitalId);
 
@@ -40,8 +39,7 @@ public interface HospitalVaccineStockMapper extends BaseMapper<HospitalVaccineSt
     int releaseStock(@Param("batchId") Long batchId, @Param("hospitalId") Long hospitalId);
 
     @Update("UPDATE hospital_vaccine_stock SET " +
-            "available_stock = available_stock - #{quantity}, " +
-            "total_stock = total_stock - #{quantity} " +
+            "available_stock = available_stock - #{quantity} " +
             "WHERE batch_id = #{batchId} AND available_stock >= #{quantity}")
     int deductStockQuantity(@Param("batchId") Long batchId, @Param("quantity") int quantity);
 
@@ -51,24 +49,21 @@ public interface HospitalVaccineStockMapper extends BaseMapper<HospitalVaccineSt
             "WHERE batch_id = #{batchId} AND locked_stock >= #{quantity}")
     int releaseStockQuantity(@Param("batchId") Long batchId, @Param("quantity") int quantity);
 
-    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity}, " +
-            "total_stock = total_stock + #{quantity} " +
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity} " +
             "WHERE batch_id = #{batchId}")
     int addStock(@Param("batchId") Long batchId, @Param("quantity") int quantity);
 
     /**
-     * 按行ID扣减可用库存（调拨专用），同步扣减 total_stock
+     * 按行ID扣减可用库存（调拨专用），total_stock 不变
      */
-    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock - #{quantity}, " +
-            "total_stock = total_stock - #{quantity} " +
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock - #{quantity} " +
             "WHERE id = #{id} AND available_stock >= #{quantity}")
     int deductStockById(@Param("id") Long id, @Param("quantity") int quantity);
 
     /**
-     * 按行ID增加可用库存（调拨专用），同步增加 total_stock
+     * 按行ID增加可用库存（调拨专用），total_stock 不变
      */
-    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity}, " +
-            "total_stock = total_stock + #{quantity} " +
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity} " +
             "WHERE id = #{id}")
     int addStockById(@Param("id") Long id, @Param("quantity") int quantity);
 

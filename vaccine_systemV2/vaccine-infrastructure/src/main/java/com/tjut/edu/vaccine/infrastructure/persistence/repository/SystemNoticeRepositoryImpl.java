@@ -56,4 +56,14 @@ public class SystemNoticeRepositoryImpl implements SystemNoticeRepository {
     public void deleteById(Long id) {
         systemNoticeMapper.deleteById(id);
     }
+
+    @Override
+    public List<SystemNotice> findPersonalByUserId(Long userId) {
+        List<SystemNoticePO> list = systemNoticeMapper.selectList(
+            new LambdaQueryWrapper<SystemNoticePO>()
+                .eq(SystemNoticePO::getTargetUserId, userId)
+                .eq(SystemNoticePO::getStatus, 1)
+                .orderByDesc(SystemNoticePO::getPublishTime));
+        return list.stream().map(SystemNoticeConverter::toDomain).toList();
+    }
 }

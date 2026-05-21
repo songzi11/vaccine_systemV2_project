@@ -20,6 +20,8 @@ public class SystemNoticePO {
 
     private Integer status;
 
+    private Long targetUserId;
+
     private Long authorId;
 
     private Long auditUserId;

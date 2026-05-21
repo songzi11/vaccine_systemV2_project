@@ -72,6 +72,22 @@ public class ObserveRecord implements Serializable {
         return this.finishTime != null;
     }
 
+    /**
+     * 系统自动完成留观（定时任务调用，已确认超过30分钟）
+     */
+    public void autoFinish() {
+        if (this.finishTime != null) {
+            return; // 幂等：已完成则跳过
+        }
+        LocalDateTime now = LocalDateTime.now();
+        long actualMinutes = Duration.between(this.startTime, now).toMinutes();
+        if (actualMinutes <= 0) {
+            actualMinutes = 1;
+        }
+        this.finishTime = now;
+        this.duration = (int) actualMinutes;
+    }
+
     public void markAbnormal() {
         if (isFinished()) {
             throw new IllegalStateException("留观已结束，不可再标记异常");

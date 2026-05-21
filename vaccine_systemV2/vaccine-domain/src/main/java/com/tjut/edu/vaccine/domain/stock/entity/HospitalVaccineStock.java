@@ -78,7 +78,7 @@ public class HospitalVaccineStock implements Serializable {
     }
 
     /**
-     * 扣减库存：接种出库，消耗已预留库存
+     * 扣减库存：接种出库，消耗已预留库存（totalStock 不变，代表初始入库量）
      */
     public void deductStock(int quantity) {
         if (quantity <= 0) {

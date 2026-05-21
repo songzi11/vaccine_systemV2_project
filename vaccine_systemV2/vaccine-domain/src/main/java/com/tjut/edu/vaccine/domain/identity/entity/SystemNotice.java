@@ -27,6 +27,8 @@ public class SystemNotice implements Serializable {
      * 状态: 0=待审核, 1=已发布, 2=已下线, 3=已驳回
      */
     private int status;
+    private Long targetUserId;
+
     private Long authorId;
     private Long auditUserId;
     private LocalDateTime auditTime;

@@ -13,11 +13,11 @@ import { computed } from 'vue'
 const props = defineProps({ notice: { type: Object, required: true } })
 defineEmits(['click'])
 const typeClass = computed(() => {
-  const map = { NORMAL: 'type-normal', URGENT: 'type-urgent', SYSTEM: 'type-system' }
+  const map = { NORMAL: 'type-normal', URGENT: 'type-urgent', SYSTEM: 'type-system', PERSONAL: 'type-personal', INTERNAL: 'type-normal' }
   return map[props.notice.type] || 'type-normal'
 })
 const typeText = computed(() => {
-  const map = { NORMAL: '公告', URGENT: '紧急', SYSTEM: '系统' }
+  const map = { NORMAL: '公告', URGENT: '紧急', SYSTEM: '系统', PERSONAL: '通知', INTERNAL: '内部' }
   return map[props.notice.type] || '公告'
 })
 </script>
@@ -34,6 +34,7 @@ const typeText = computed(() => {
 .type-normal { background: $color-info-light; color: $color-info; }
 .type-urgent { background: $color-danger-light; color: $color-danger; }
 .type-system { background: $color-success-light; color: $color-success; }
+.type-personal { background: $color-warning-light; color: $color-warning; }
 .notice-title { font-size: $font-size-base; color: $color-text-primary; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .notice-date { font-size: $font-size-xs; color: $color-text-placeholder; }
 </style>

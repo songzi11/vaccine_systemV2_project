@@ -146,11 +146,13 @@ export const NOTICE_STATUS_COLOR = {
 // ==================== 公告类型 ====================
 export const NOTICE_TYPE = {
   SYSTEM: 'SYSTEM',
+  PERSONAL: 'PERSONAL',
   INTERNAL: 'INTERNAL'
 }
 
 export const NOTICE_TYPE_TEXT = {
   [NOTICE_TYPE.SYSTEM]: '系统公告',
+  [NOTICE_TYPE.PERSONAL]: '个人通知',
   [NOTICE_TYPE.INTERNAL]: '内部公告'
 }
 
@@ -333,7 +335,7 @@ export const CALL_TIMEOUT = 5 * 60 * 1000
 export const MAX_MISS_COUNT = 3
 
 /** 爽约冻结天数 */
-export const NO_SHOW_FREEZE_DAYS = 7
+export const NO_SHOW_FREEZE_DAYS = 30
 
 // ==================== 管理员端常量 ====================
 

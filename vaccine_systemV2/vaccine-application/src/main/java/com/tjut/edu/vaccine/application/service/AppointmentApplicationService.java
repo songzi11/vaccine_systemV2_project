@@ -79,6 +79,12 @@ public class AppointmentApplicationService {
         // 0. 预校验快捷失败（无需抢锁）
         User user = userRepository.findById(userId);
         if (user == null || !user.isAppointmentAllowed()) {
+            if (user != null && user.getFreezeEndTime() != null) {
+                String endDate = user.getFreezeEndTime().format(
+                        java.time.format.DateTimeFormatter.ofPattern("yyyy年MM月dd日"));
+                throw new BusinessException(ErrorCode.NO_SHOW_FROZEN.getCode(),
+                        "您的预约功能已暂停至" + endDate + "，如有疑问请联系工作人员。");
+            }
             throw new BusinessException(ErrorCode.USER_FROZEN_LOGIN);
         }
         ChildProfile child = childProfileRepository.findById(req.getChildId());

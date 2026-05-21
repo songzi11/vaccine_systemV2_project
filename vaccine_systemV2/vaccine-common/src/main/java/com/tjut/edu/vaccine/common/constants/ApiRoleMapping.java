@@ -8,7 +8,6 @@ public final class ApiRoleMapping {
 
     public static final String PUBLIC_PREFIX = "/api/v1/public";
     public static final String USER_PREFIX = "/api/v1/user";
-    public static final String SIGNIN_PREFIX = "/api/v1/signin";
     public static final String PRECHECK_PREFIX = "/api/v1/precheck";
     public static final String VACCINATE_PREFIX = "/api/v1/vaccinate";
     public static final String OBSERVE_PREFIX = "/api/v1/observe";
@@ -25,8 +24,7 @@ public final class ApiRoleMapping {
         return switch (pathPrefix) {
             case PUBLIC_PREFIX -> List.of();
             case USER_PREFIX -> List.of("USER");
-            case SIGNIN_PREFIX -> List.of("DOCTOR_SIGNIN", "DOCTOR_PRECHECK");
-            case PRECHECK_PREFIX -> List.of("DOCTOR_PRECHECK");
+            case PRECHECK_PREFIX -> List.of("DOCTOR_PRECHECK", "DOCTOR_SIGNIN");
             case VACCINATE_PREFIX -> List.of("DOCTOR_VACCINATE");
             case OBSERVE_PREFIX -> List.of("DOCTOR_OBSERVE");
             case STOCK_PREFIX -> List.of("DOCTOR_STOCK");

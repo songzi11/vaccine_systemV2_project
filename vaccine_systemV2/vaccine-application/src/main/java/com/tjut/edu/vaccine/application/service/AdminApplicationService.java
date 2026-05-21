@@ -427,13 +427,26 @@ public class AdminApplicationService {
     @Transactional(readOnly = true)
     public List<NoticeResponse> findPublishedNotices(List<String> roles) {
         List<SystemNotice> notices = systemNoticeRepository.findPublished();
-        // 家长只能看系统公告，医生和管理员可以看所有公告
+        // 家长只能看系统公告 + 自己的个人通知，医生和管理员可以看所有公告
         boolean isUserOnly = roles != null && roles.contains("USER")
                 && roles.stream().noneMatch(r -> r.startsWith("DOCTOR_") || r.equals("SUPER_ADMIN"));
         if (isUserOnly) {
             notices = notices.stream()
                     .filter(n -> "SYSTEM".equals(n.getNoticeType()))
                     .toList();
+            // 追加该用户的个人通知
+            Long userId = securityContextPort.getCurrentUserId();
+            if (userId != null) {
+                List<SystemNotice> personalNotices = systemNoticeRepository.findPersonalByUserId(userId);
+                notices = new java.util.ArrayList<>(notices);
+                notices.addAll(personalNotices);
+                // 按发布时间降序排列
+                notices.sort((a, b) -> {
+                    if (a.getPublishTime() == null) return 1;
+                    if (b.getPublishTime() == null) return -1;
+                    return b.getPublishTime().compareTo(a.getPublishTime());
+                });
+            }
         }
         return AdminAssembler.toNoticeResponseList(notices);
     }

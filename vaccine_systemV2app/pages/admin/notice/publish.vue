@@ -20,6 +20,10 @@
           <view class="picker-value">{{ typeLabel || '请选择公告类型' }}</view>
         </picker>
       </view>
+      <view class="form-item" v-if="form.noticeType === NOTICE_TYPE.PERSONAL">
+        <text class="form-label">目标用户ID *</text>
+        <uni-easyinput v-model="form.targetUserId" placeholder="请输入目标用户ID" type="number" />
+      </view>
       <view class="form-item">
         <text class="form-label">生效时间 *</text>
         <uni-datetime-picker type="date" v-model="form.startTime" :clear-icon="false" />
@@ -45,12 +49,13 @@ import { NOTICE_TYPE, NOTICE_TYPE_TEXT } from '@/utils/constants.js'
 const submitting = ref(false)
 const typeOptions = [
   { value: NOTICE_TYPE.SYSTEM, label: NOTICE_TYPE_TEXT[NOTICE_TYPE.SYSTEM] },
+  { value: NOTICE_TYPE.PERSONAL, label: NOTICE_TYPE_TEXT[NOTICE_TYPE.PERSONAL] },
   { value: NOTICE_TYPE.INTERNAL, label: NOTICE_TYPE_TEXT[NOTICE_TYPE.INTERNAL] }
 ]
 
 const form = reactive({
   title: '', content: '', noticeType: '',
-  startTime: '', endTime: ''
+  startTime: '', endTime: '', targetUserId: ''
 })
 
 const typeLabel = computed(() => {
@@ -66,12 +71,16 @@ async function handleSubmit() {
   if (!form.title) { uni.showToast({ title: '请输入公告标题', icon: 'none' }); return }
   if (!form.content) { uni.showToast({ title: '请输入公告内容', icon: 'none' }); return }
   if (!form.noticeType) { uni.showToast({ title: '请选择公告类型', icon: 'none' }); return }
+  if (form.noticeType === NOTICE_TYPE.PERSONAL && !form.targetUserId) { uni.showToast({ title: '请输入目标用户ID', icon: 'none' }); return }
   if (!form.startTime || !form.endTime) { uni.showToast({ title: '请选择生效/失效时间', icon: 'none' }); return }
   if (form.startTime >= form.endTime) { uni.showToast({ title: '失效时间须晚于生效时间', icon: 'none' }); return }
 
   submitting.value = true
+  const payload = { ...form }
+  if (payload.noticeType !== NOTICE_TYPE.PERSONAL) delete payload.targetUserId
+  else payload.targetUserId = Number(payload.targetUserId)
   try {
-    await publishNotice(form)
+    await publishNotice(payload)
     uni.showToast({ title: '已提交审批', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 1500)
   } catch (e) { /* handled by interceptor */ } finally { submitting.value = false }

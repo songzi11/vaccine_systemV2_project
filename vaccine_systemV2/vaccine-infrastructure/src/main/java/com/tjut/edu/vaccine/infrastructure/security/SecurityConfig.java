@@ -65,6 +65,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/admin/users/*/assign-window")
                     .hasAnyRole("SUPER_ADMIN", "DOCTOR_BUSINESS_ADMIN")
                 .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")
+                // 医生业务接口 - 各岗位角色隔离，各司其职
+                .requestMatchers("/api/v1/precheck/**")
+                    .hasAnyRole("SUPER_ADMIN", "DOCTOR_PRECHECK", "DOCTOR_SIGNIN")
+                .requestMatchers("/api/v1/vaccinate/**")
+                    .hasAnyRole("SUPER_ADMIN", "DOCTOR_VACCINATE")
+                .requestMatchers("/api/v1/observe/**")
+                    .hasAnyRole("SUPER_ADMIN", "DOCTOR_OBSERVE")
+                .requestMatchers("/api/v1/stock/**")
+                    .hasAnyRole("SUPER_ADMIN", "DOCTOR_STOCK")
                 // 其余接口需要认证
                 .anyRequest().authenticated()
             )

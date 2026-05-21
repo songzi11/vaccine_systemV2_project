@@ -173,6 +173,16 @@ function handleBusinessError(code, message) {
     return
   }
 
+  // 用户被冻结（爽约冻结）- 使用 modal 提示
+  if (code === 1011 || code === 1012) {
+    uni.showModal({
+      title: '预约功能暂停',
+      content: message || '您的预约功能已被暂停，如有疑问请联系工作人员。',
+      showCancel: false
+    })
+    return
+  }
+
   // 默认显示服务端返回的消息
   uni.showToast({ title: message || '操作失败', icon: 'none' })
 }

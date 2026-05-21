@@ -15,6 +15,7 @@ public class SystemNoticeConverter {
         notice.setContent(po.getContent());
         notice.setNoticeType(po.getNoticeType());
         notice.setStatus(po.getStatus());
+        notice.setTargetUserId(po.getTargetUserId());
         notice.setAuthorId(po.getAuthorId());
         notice.setAuditUserId(po.getAuditUserId());
         notice.setAuditTime(po.getAuditTime());
@@ -37,6 +38,7 @@ public class SystemNoticeConverter {
         po.setContent(notice.getContent());
         po.setNoticeType(notice.getNoticeType());
         po.setStatus(notice.getStatus());
+        po.setTargetUserId(notice.getTargetUserId());
         po.setAuthorId(notice.getAuthorId());
         po.setAuditUserId(notice.getAuditUserId());
         po.setAuditTime(notice.getAuditTime());
