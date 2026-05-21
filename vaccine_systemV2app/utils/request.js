@@ -13,6 +13,9 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 // 请求队列，用于 loading 控制
 let requestCount = 0
 
+// 防止 401 并发时重复处理（多个请求同时返回 401 时只处理一次）
+let isHandlingUnauthorized = false
+
 function showLoading() {
   if (requestCount === 0) {
     uni.showLoading({ title: '加载中...', mask: true })
@@ -137,12 +140,21 @@ function request(options) {
 
 /**
  * 处理 401 未授权
+ * 使用 isHandlingUnauthorized 防止多个并发请求同时返回 401 时重复处理
  */
 function handleUnauthorized() {
-  removeToken()
-  if (isManualLogout()) {
+  if (isHandlingUnauthorized) {
     return
   }
+  isHandlingUnauthorized = true
+
+  if (isManualLogout()) {
+    removeToken()
+    isHandlingUnauthorized = false
+    return
+  }
+
+  removeToken()
   uni.showToast({ title: '登录已过期', icon: 'none' })
   setTimeout(() => {
     uni.reLaunch({ url: '/pages/auth/login' })

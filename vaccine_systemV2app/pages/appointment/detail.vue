@@ -84,6 +84,11 @@
       </view>
     </view>
 
+    <view v-else-if="loadError" class="error-tip">
+      <text class="error-text">{{ loadError }}</text>
+      <button class="retry-btn" @tap="loadDetail">重试</button>
+    </view>
+
     <view v-else class="loading-tip">
       <text>加载中...</text>
     </view>
@@ -99,6 +104,7 @@ import { formatTimeSlot } from '@/utils/format.js'
 
 const detail = ref(null)
 const appointmentId = ref(null)
+const loadError = ref('')
 
 const statusText = computed(() => APPOINTMENT_STATUS_TEXT[detail.value?.status] || '未知')
 
@@ -133,10 +139,12 @@ onShow(() => {
 })
 
 async function loadDetail() {
+  loadError.value = ''
   try {
     detail.value = await getAppointmentDetail(appointmentId.value)
   } catch (e) {
     console.error('加载预约详情失败', e)
+    loadError.value = e.message || '加载失败，请重试'
   }
 }
 
@@ -292,6 +300,31 @@ function goToGuide() {
   text {
     font-size: $font-size-sm;
     color: $color-text-placeholder;
+  }
+}
+
+.error-tip {
+  text-align: center;
+  padding: 120rpx 48rpx;
+
+  .error-text {
+    display: block;
+    font-size: $font-size-base;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-lg;
+  }
+
+  .retry-btn {
+    width: 240rpx;
+    height: 72rpx;
+    line-height: 72rpx;
+    background-color: $color-primary;
+    color: #FFFFFF;
+    font-size: $font-size-base;
+    border: none;
+    border-radius: $radius-round;
+
+    &::after { border: none; }
   }
 }
 </style>
