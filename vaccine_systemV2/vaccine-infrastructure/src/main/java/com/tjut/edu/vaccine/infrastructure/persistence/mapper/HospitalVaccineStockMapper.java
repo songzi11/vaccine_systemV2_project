@@ -40,7 +40,8 @@ public interface HospitalVaccineStockMapper extends BaseMapper<HospitalVaccineSt
     int releaseStock(@Param("batchId") Long batchId, @Param("hospitalId") Long hospitalId);
 
     @Update("UPDATE hospital_vaccine_stock SET " +
-            "available_stock = available_stock - #{quantity} " +
+            "available_stock = available_stock - #{quantity}, " +
+            "total_stock = total_stock - #{quantity} " +
             "WHERE batch_id = #{batchId} AND available_stock >= #{quantity}")
     int deductStockQuantity(@Param("batchId") Long batchId, @Param("quantity") int quantity);
 
@@ -50,21 +51,24 @@ public interface HospitalVaccineStockMapper extends BaseMapper<HospitalVaccineSt
             "WHERE batch_id = #{batchId} AND locked_stock >= #{quantity}")
     int releaseStockQuantity(@Param("batchId") Long batchId, @Param("quantity") int quantity);
 
-    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity} " +
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity}, " +
+            "total_stock = total_stock + #{quantity} " +
             "WHERE batch_id = #{batchId}")
     int addStock(@Param("batchId") Long batchId, @Param("quantity") int quantity);
 
     /**
-     * 按行ID扣减可用库存（调拨专用）
+     * 按行ID扣减可用库存（调拨专用），同步扣减 total_stock
      */
-    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock - #{quantity} " +
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock - #{quantity}, " +
+            "total_stock = total_stock - #{quantity} " +
             "WHERE id = #{id} AND available_stock >= #{quantity}")
     int deductStockById(@Param("id") Long id, @Param("quantity") int quantity);
 
     /**
-     * 按行ID增加可用库存（调拨专用）
+     * 按行ID增加可用库存（调拨专用），同步增加 total_stock
      */
-    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity} " +
+    @Update("UPDATE hospital_vaccine_stock SET available_stock = available_stock + #{quantity}, " +
+            "total_stock = total_stock + #{quantity} " +
             "WHERE id = #{id}")
     int addStockById(@Param("id") Long id, @Param("quantity") int quantity);
 

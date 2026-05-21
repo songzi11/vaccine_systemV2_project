@@ -204,9 +204,9 @@ public class StockApplicationService {
             throw new BusinessException(ErrorCode.STOCK_TRANSFER_INSUFFICIENT);
         }
 
-        // 4. 查找或创建目标库存
+        // 4. 查找或创建目标库存（加行锁防并发）
         HospitalVaccineStock toStock = vaccineStockRepository
-                .findByLocation(req.getBatchId(), req.getToType(), req.getToId())
+                .findByLocationForUpdate(req.getBatchId(), req.getToType(), req.getToId())
                 .orElse(null);
 
         if (toStock == null) {
@@ -214,7 +214,7 @@ public class StockApplicationService {
                     defaultHospitalId, req.getBatchId(), req.getToType(), req.getToId(), 0);
             vaccineStockRepository.save(newStock);
             toStock = vaccineStockRepository
-                    .findByLocation(req.getBatchId(), req.getToType(), req.getToId())
+                    .findByLocationForUpdate(req.getBatchId(), req.getToType(), req.getToId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_TRANSFER_FAILED));
         }
 

@@ -45,16 +45,14 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
 
     @Override
     public void updateStatus(Appointment appointment) {
-        AppointmentPO po = new AppointmentPO();
-        po.setId(appointment.getId());
-        po.setStatus(appointment.getStatus());
-        po.setCurrentWindow(appointment.getCurrentWindow());
-        po.setSigninTime(appointment.getSigninTime());
-        po.setCancelTime(appointment.getCancelTime());
-        po.setCancelReason(appointment.getCancelReason());
-        po.setBatchId(appointment.getBatchId());
-        po.setUpdateTime(LocalDateTime.now());
-        appointmentMapper.updateById(po);
+        appointmentMapper.updateStatusFields(
+                appointment.getId(),
+                appointment.getStatus(),
+                appointment.getCurrentWindow(),
+                appointment.getSigninTime(),
+                appointment.getCancelTime(),
+                appointment.getCancelReason(),
+                appointment.getBatchId());
     }
 
     @Override

@@ -33,4 +33,16 @@ public interface AppointmentMapper extends BaseMapper<AppointmentPO> {
 
     @Select("SELECT RELEASE_LOCK(#{lockName})")
     Integer releaseLock(@Param("lockName") String lockName);
+
+    @org.apache.ibatis.annotations.Update("UPDATE appointment SET status = #{status}, " +
+            "current_window = #{currentWindow}, signin_time = #{signinTime}, " +
+            "cancel_time = #{cancelTime}, cancel_reason = #{cancelReason}, " +
+            "batch_id = #{batchId}, update_time = NOW() WHERE id = #{id}")
+    int updateStatusFields(@Param("id") Long id,
+                           @Param("status") int status,
+                           @Param("currentWindow") String currentWindow,
+                           @Param("signinTime") java.time.LocalDateTime signinTime,
+                           @Param("cancelTime") java.time.LocalDateTime cancelTime,
+                           @Param("cancelReason") String cancelReason,
+                           @Param("batchId") Long batchId);
 }
