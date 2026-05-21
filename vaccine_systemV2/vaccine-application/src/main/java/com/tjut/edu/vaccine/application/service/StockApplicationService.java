@@ -154,7 +154,7 @@ public class StockApplicationService {
     public VaccineBatchResponse createBatch(BatchCreateRequest req) {
         // 1. 验证疫苗存在
         vaccineRepository.findById(req.getVaccineId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_BATCH_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.VACCINE_NOT_FOUND));
 
         // 2. 创建批次
         VaccineBatch batch = new VaccineBatch();

@@ -34,8 +34,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ObserveApplicationService {
 
-    private static final int MIN_OBSERVE_MINUTES = 30;
-
     private final AppointmentRepository appointmentRepository;
     private final ObserveRecordRepository observeRecordRepository;
     private final AdverseReactionRepository adverseReactionRepository;
@@ -57,7 +55,7 @@ public class ObserveApplicationService {
             throw new BusinessException(ErrorCode.OBSERVE_STATUS_INVALID);
         }
 
-        ObserveRecord existingRecord = observeRecordRepository.findByAppointmentId(req.getAppointmentId()).orElse(null);
+        ObserveRecord existingRecord = observeRecordRepository.findByAppointmentIdForUpdate(req.getAppointmentId()).orElse(null);
         if (existingRecord != null) {
             return ObserveAssembler.toResponse(existingRecord);
         }
@@ -114,13 +112,22 @@ public class ObserveApplicationService {
         completeAppointmentIfObserving(appointment);
 
         log.info("留观完成: appointmentId={}, duration={}min, result={}",
-                id, req.getDurationMinutes(), record.getObserveResult().getCode());
+                id, record.getDuration(), record.getObserveResult().getCode());
 
         return ObserveAssembler.toResponse(record);
     }
 
     @Transactional
     public AdverseReactionResponse reportAdverseReaction(AdverseReactionRequest req) {
+        // 0. 校验预约必须处于留观状态
+        Appointment appointment = appointmentRepository.findByIdForUpdate(req.getAppointmentId());
+        if (appointment == null) {
+            throw new BusinessException(ErrorCode.APPOINT_NOT_FOUND);
+        }
+        if (appointment.getStatus() != AppointmentStatus.OBSERVING.getCode()) {
+            throw new BusinessException(ErrorCode.OBSERVE_STATUS_INVALID);
+        }
+
         // 1. 查找或创建留观记录
         Long observeRecordId = req.getObserveRecordId();
         if (observeRecordId == null) {

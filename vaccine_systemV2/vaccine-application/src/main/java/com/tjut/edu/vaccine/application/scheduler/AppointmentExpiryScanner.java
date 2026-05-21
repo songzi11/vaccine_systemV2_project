@@ -6,6 +6,8 @@ import com.tjut.edu.vaccine.domain.appointment.repository.AppointmentRepository;
 import com.tjut.edu.vaccine.domain.stock.repository.VaccineStockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +22,11 @@ public class AppointmentExpiryScanner {
     private final AppointmentRepository appointmentRepository;
     private final VaccineStockRepository vaccineStockRepository;
 
+    @Value("${vaccine.default-hospital-id:1}")
+    private Long defaultHospitalId;
+
     @Scheduled(cron = "${schedule.cron_expire:0 30 0 * * ?}")
+    @Transactional
     public void scanExpiredAppointments() {
         LocalDate today = LocalDate.now();
         List<Appointment> expiredList = appointmentRepository.findExpired(today);
@@ -38,7 +44,7 @@ public class AppointmentExpiryScanner {
                 // 释放已锁定的库存（如果已分配批次）
                 if (appointment.getBatchId() != null) {
                     try {
-                        vaccineStockRepository.releaseStock(appointment.getBatchId());
+                        vaccineStockRepository.releaseStock(appointment.getBatchId(), defaultHospitalId);
                     } catch (Exception e) {
                         log.warn("释放库存失败: appointmentId={}, batchId={}",
                                 appointment.getId(), appointment.getBatchId(), e);

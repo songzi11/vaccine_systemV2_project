@@ -14,13 +14,13 @@ public interface VaccineStockRepository {
 
     Optional<HospitalVaccineStock> findByBatchIdForUpdate(Long batchId);
 
-    void lockStock(Long batchId);
+    void lockStock(Long batchId, Long hospitalId);
 
-    void deductStock(Long batchId);
+    void deductStock(Long batchId, Long hospitalId);
 
     void deductStock(Long batchId, int quantity);
 
-    void releaseStock(Long batchId);
+    void releaseStock(Long batchId, Long hospitalId);
 
     void releaseStock(Long batchId, int quantity);
 

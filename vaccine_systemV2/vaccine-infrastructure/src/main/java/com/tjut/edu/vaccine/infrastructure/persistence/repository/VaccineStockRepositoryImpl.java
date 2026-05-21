@@ -38,18 +38,18 @@ public class VaccineStockRepositoryImpl implements VaccineStockRepository {
     }
 
     @Override
-    public void lockStock(Long batchId) {
-        int rows = stockMapper.lockStock(batchId);
+    public void lockStock(Long batchId, Long hospitalId) {
+        int rows = stockMapper.lockStock(batchId, hospitalId);
         if (rows == 0) {
-            throw new RuntimeException("库存锁定失败: batchId=" + batchId);
+            throw new RuntimeException("库存锁定失败: batchId=" + batchId + ", hospitalId=" + hospitalId);
         }
     }
 
     @Override
-    public void deductStock(Long batchId) {
-        int rows = stockMapper.deductStock(batchId);
+    public void deductStock(Long batchId, Long hospitalId) {
+        int rows = stockMapper.deductStock(batchId, hospitalId);
         if (rows == 0) {
-            throw new RuntimeException("库存扣减失败: batchId=" + batchId);
+            throw new RuntimeException("库存扣减失败: batchId=" + batchId + ", hospitalId=" + hospitalId);
         }
     }
 
@@ -62,8 +62,8 @@ public class VaccineStockRepositoryImpl implements VaccineStockRepository {
     }
 
     @Override
-    public void releaseStock(Long batchId) {
-        stockMapper.releaseStock(batchId);
+    public void releaseStock(Long batchId, Long hospitalId) {
+        stockMapper.releaseStock(batchId, hospitalId);
     }
 
     @Override
@@ -125,8 +125,6 @@ public class VaccineStockRepositoryImpl implements VaccineStockRepository {
     public List<HospitalVaccineStock> findAllWithStock() {
         List<HospitalVaccineStockPO> list = stockMapper.selectList(
             new LambdaQueryWrapper<HospitalVaccineStockPO>()
-                .gt(HospitalVaccineStockPO::getTotalStock, 0)
-                .or()
                 .gt(HospitalVaccineStockPO::getAvailableStock, 0)
                 .or()
                 .gt(HospitalVaccineStockPO::getLockedStock, 0));

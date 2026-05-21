@@ -55,6 +55,9 @@ public class AdverseReaction implements Serializable {
     }
 
     public void handle(String handleResult, Long handlerId) {
+        if (this.handleTime != null) {
+            throw new IllegalStateException("该不良反应已处理，不可重复处理");
+        }
         if (handleResult == null || handleResult.isBlank()) {
             throw new IllegalArgumentException("处理结果不能为空");
         }

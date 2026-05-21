@@ -92,7 +92,7 @@ public class VaccinateApplicationService {
 
         // 4. 锁定库存
         try {
-            vaccineStockRepository.lockStock(batch.getId());
+            vaccineStockRepository.lockStock(batch.getId(), defaultHospitalId);
         } catch (RuntimeException e) {
             log.error("库存锁定失败: batchId={}", batch.getId(), e);
             throw new BusinessException(ErrorCode.VACCINATE_STOCK_INSUFFICIENT);
@@ -110,7 +110,7 @@ public class VaccinateApplicationService {
 
         // 7. 扣减库存（消耗已锁定库存，接种出库）
         try {
-            vaccineStockRepository.deductStock(batch.getId());
+            vaccineStockRepository.deductStock(batch.getId(), defaultHospitalId);
         } catch (RuntimeException e) {
             log.error("库存扣减失败: batchId={}", batch.getId(), e);
             throw new BusinessException(ErrorCode.VACCINATE_DEDUCT_FAILED);

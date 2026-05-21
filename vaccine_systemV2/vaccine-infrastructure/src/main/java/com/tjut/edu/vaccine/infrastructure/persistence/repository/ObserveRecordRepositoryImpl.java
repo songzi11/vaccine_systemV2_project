@@ -33,6 +33,15 @@ public class ObserveRecordRepositoryImpl implements ObserveRecordRepository {
     }
 
     @Override
+    public Optional<ObserveRecord> findByAppointmentIdForUpdate(Long appointmentId) {
+        ObserveRecordPO po = observeRecordMapper.selectOne(
+            new LambdaQueryWrapper<ObserveRecordPO>()
+                .eq(ObserveRecordPO::getAppointmentId, appointmentId)
+                .last("FOR UPDATE"));
+        return Optional.ofNullable(po).map(ObserveRecordConverter::toDomain);
+    }
+
+    @Override
     public Optional<ObserveRecord> findByInjectionId(String injectionId) {
         ObserveRecordPO po = observeRecordMapper.selectOne(
             new LambdaQueryWrapper<ObserveRecordPO>()

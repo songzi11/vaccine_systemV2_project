@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class ObserveRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    public static final int MIN_OBSERVE_MINUTES = 30;
 
     private Long id;
     private Long appointmentId;
@@ -59,6 +60,9 @@ public class ObserveRecord implements Serializable {
         long actualMinutes = Duration.between(this.startTime, now).toMinutes();
         if (actualMinutes <= 0) {
             actualMinutes = 1;
+        }
+        if (actualMinutes < MIN_OBSERVE_MINUTES) {
+            throw new IllegalStateException("留观时间不足" + MIN_OBSERVE_MINUTES + "分钟，当前仅" + actualMinutes + "分钟");
         }
         this.finishTime = now;
         this.duration = (int) actualMinutes;

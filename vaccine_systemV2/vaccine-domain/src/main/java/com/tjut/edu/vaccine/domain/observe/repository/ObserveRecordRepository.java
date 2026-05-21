@@ -13,6 +13,8 @@ public interface ObserveRecordRepository {
 
     Optional<ObserveRecord> findByAppointmentId(Long appointmentId);
 
+    Optional<ObserveRecord> findByAppointmentIdForUpdate(Long appointmentId);
+
     Optional<ObserveRecord> findByInjectionId(String injectionId);
 
     void save(ObserveRecord observeRecord);

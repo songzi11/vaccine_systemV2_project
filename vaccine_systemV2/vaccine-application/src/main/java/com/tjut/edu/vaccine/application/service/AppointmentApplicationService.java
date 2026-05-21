@@ -29,6 +29,7 @@ import com.tjut.edu.vaccine.domain.vaccinate.repository.VaccinationRecordReposit
 import com.tjut.edu.vaccine.domain.port.SecurityContextPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +54,9 @@ public class AppointmentApplicationService {
     private static final List<String> APPOINTMENT_TIME_SLOTS = List.of(
             "08:00-09:00", "09:00-10:00", "10:00-11:00", "11:00-12:00",
             "14:00-15:00", "15:00-16:00", "16:00-17:00");
+
+    @Value("${vaccine.default-hospital-id:1}")
+    private Long defaultHospitalId;
 
     private final AppointmentRepository appointmentRepository;
     private final ChildProfileRepository childProfileRepository;
@@ -141,11 +145,21 @@ public class AppointmentApplicationService {
             throw new BusinessException(ErrorCode.APPOINT_NOT_FOUND);
         }
 
-        // 5. 释放已锁定的库存（如果已分配批次）
-        if (appointment.getBatchId() != null) {
-            vaccineStockRepository.releaseStock(appointment.getBatchId());
-            log.info("预约取消释放库存: appointmentId={}, batchId={}", appointmentId, appointment.getBatchId());
+        // 2. 校验归属
+        if (!appointment.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.APPOINT_NOT_OWN);
         }
+
+        // 3. 释放已锁定的库存（如果已分配批次）
+        if (appointment.getBatchId() != null) {
+            vaccineStockRepository.releaseStock(appointment.getBatchId(), defaultHospitalId);
+            log.info("预约取消释放库存: appointmentId={}, batchId={}", appointmentId, appointment.getBatchId());
+            appointment.assignBatch(null);
+        }
+
+        // 4. 执行取消（状态机校验 + 更新状态）
+        appointment.cancel(req.getReason());
+        appointmentRepository.updateStatus(appointment);
 
         log.info("预约取消成功: userId={}, appointmentId={}, reason={}",
                 userId, appointmentId, req.getReason());

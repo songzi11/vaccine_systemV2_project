@@ -1,6 +1,8 @@
 package com.tjut.edu.vaccine.infrastructure.persistence.repository;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.tjut.edu.vaccine.common.enums.AppointmentStatus;
+import com.tjut.edu.vaccine.common.enums.AppointmentStatusMachine;
 import com.tjut.edu.vaccine.domain.appointment.aggregate.Appointment;
 import com.tjut.edu.vaccine.domain.appointment.repository.AppointmentRepository;
 import com.tjut.edu.vaccine.infrastructure.persistence.converter.AppointmentConverter;
@@ -88,7 +90,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
             new LambdaQueryWrapper<AppointmentPO>()
                 .eq(AppointmentPO::getUserId, userId)
                 .eq(AppointmentPO::getChildId, childId)
-                .in(AppointmentPO::getStatus, List.of(1, 6, 7, 10))
+                .in(AppointmentPO::getStatus, AppointmentStatusMachine.IN_PROGRESS)
         );
         return list.stream().map(AppointmentConverter::toDomain).toList();
     }
@@ -97,8 +99,8 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
     public List<Appointment> findExpired(LocalDate date) {
         List<AppointmentPO> list = appointmentMapper.selectList(
             new LambdaQueryWrapper<AppointmentPO>()
-                .eq(AppointmentPO::getStatus, 1)
-                .lt(AppointmentPO::getAppointmentDate, date)
+                .eq(AppointmentPO::getStatus, AppointmentStatus.APPOINTED.getCode())
+                .le(AppointmentPO::getAppointmentDate, date)
         );
         return list.stream().map(AppointmentConverter::toDomain).toList();
     }
@@ -170,7 +172,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
         LambdaQueryWrapper<AppointmentPO> wrapper = new LambdaQueryWrapper<AppointmentPO>()
             .likeRight(AppointmentPO::getAppointmentNo, prefix)
             .orderByDesc(AppointmentPO::getAppointmentNo)
-            .last("LIMIT 1");
+            .last("LIMIT 1 FOR UPDATE");
         AppointmentPO last = appointmentMapper.selectOne(wrapper);
         int seq = 1;
         if (last != null && last.getAppointmentNo().length() > prefix.length()) {
