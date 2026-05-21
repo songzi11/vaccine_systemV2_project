@@ -34,6 +34,8 @@ public interface VaccineStockRepository {
 
     Optional<HospitalVaccineStock> findByLocation(Long batchId, Integer locationType, Long locationId);
 
+    Optional<HospitalVaccineStock> findByLocationForUpdate(Long batchId, Integer locationType, Long locationId);
+
     void save(HospitalVaccineStock stock);
 
     List<HospitalVaccineStock> findAllAvailable(Long vaccineId);

@@ -38,16 +38,30 @@ public class AppointmentExpiryScanner {
         int count = 0;
         for (Appointment appointment : expiredList) {
             try {
-                appointment.transitionStatus(AppointmentStatus.EXPIRED.getCode());
-                appointmentRepository.updateStatus(appointment);
+                // 加行锁重新读取，防止与用户取消操作并发导致库存双重释放
+                Appointment locked = appointmentRepository.findByIdForUpdate(appointment.getId());
+                if (locked == null) {
+                    continue;
+                }
+                // 再次确认仍为 APPOINTED 状态（可能已被用户取消）
+                if (locked.getStatus() != AppointmentStatus.APPOINTED.getCode()) {
+                    log.info("预约已被其他操作处理，跳过: appointmentId={}, currentStatus={}",
+                            locked.getId(), locked.getStatus());
+                    continue;
+                }
+
+                locked.transitionStatus(AppointmentStatus.EXPIRED.getCode());
+                appointmentRepository.updateStatus(locked);
 
                 // 释放已锁定的库存（如果已分配批次）
-                if (appointment.getBatchId() != null) {
+                if (locked.getBatchId() != null) {
                     try {
-                        vaccineStockRepository.releaseStock(appointment.getBatchId(), defaultHospitalId);
+                        vaccineStockRepository.releaseStock(locked.getBatchId(), defaultHospitalId);
+                        locked.assignBatch(null);
+                        appointmentRepository.updateStatus(locked);
                     } catch (Exception e) {
                         log.warn("释放库存失败: appointmentId={}, batchId={}",
-                                appointment.getId(), appointment.getBatchId(), e);
+                                locked.getId(), locked.getBatchId(), e);
                     }
                 }
                 count++;

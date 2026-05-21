@@ -40,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -86,7 +87,7 @@ public class AppointmentApplicationService {
         if (child == null) {
             throw new BusinessException(ErrorCode.APPOINT_CHILD_NOT_FOUND);
         }
-        if (!child.getParentId().equals(userId)) {
+        if (!Objects.equals(child.getParentId(), userId)) {
             throw new BusinessException(ErrorCode.APPOINT_CHILD_NOT_OWN);
         }
 
@@ -128,6 +129,13 @@ public class AppointmentApplicationService {
         String appointmentNo = appointmentRepository.generateAppointmentNo(req.getAppointmentDate());
         appointment.setAppointmentNo(appointmentNo);
         appointmentRepository.save(appointment);
+
+        // 9. 插入后二次验证容量（防止并发插入超限）
+        int postInsertCount = appointmentRepository.countBySlotForUpdate(
+                req.getVaccineId(), req.getAppointmentDate(), req.getTimeSlot());
+        if (postInsertCount > maxCapacity) {
+            throw new BusinessException(ErrorCode.APPOINT_SLOT_FULL);
+        }
 
         log.info("预约创建成功: userId={}, appointmentNo={}, childId={}, vaccineId={}",
                 userId, appointmentNo, req.getChildId(), req.getVaccineId());

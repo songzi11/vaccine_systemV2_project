@@ -23,4 +23,7 @@ public class HospitalVaccineStockPO {
     private Integer availableStock;
 
     private Integer lockedStock;
+
+    @Version
+    private Integer version;
 }

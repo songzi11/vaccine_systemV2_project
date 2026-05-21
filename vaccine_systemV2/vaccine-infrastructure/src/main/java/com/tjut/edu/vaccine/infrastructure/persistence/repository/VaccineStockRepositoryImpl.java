@@ -111,6 +111,17 @@ public class VaccineStockRepositoryImpl implements VaccineStockRepository {
     }
 
     @Override
+    public Optional<HospitalVaccineStock> findByLocationForUpdate(Long batchId, Integer locationType, Long locationId) {
+        HospitalVaccineStockPO po = stockMapper.selectOne(
+            new LambdaQueryWrapper<HospitalVaccineStockPO>()
+                .eq(HospitalVaccineStockPO::getBatchId, batchId)
+                .eq(HospitalVaccineStockPO::getLocationType, locationType)
+                .eq(HospitalVaccineStockPO::getLocationId, locationId)
+                .last("FOR UPDATE"));
+        return Optional.ofNullable(po).map(HospitalVaccineStockConverter::toDomain);
+    }
+
+    @Override
     public void save(HospitalVaccineStock stock) {
         stockMapper.insert(HospitalVaccineStockConverter.toPO(stock));
     }

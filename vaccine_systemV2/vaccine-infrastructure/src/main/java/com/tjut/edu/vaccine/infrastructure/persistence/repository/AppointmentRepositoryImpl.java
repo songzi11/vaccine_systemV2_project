@@ -136,7 +136,7 @@ public class AppointmentRepositoryImpl implements AppointmentRepository {
                 .eq(AppointmentPO::getChildId, childId)
                 .eq(AppointmentPO::getVaccineId, vaccineId)
                 .eq(AppointmentPO::getAppointmentDate, date)
-                .notIn(AppointmentPO::getStatus, List.of(3, 4))
+                .notIn(AppointmentPO::getStatus, List.of(3, 4, 9))
         );
         return count != null && count > 0;
     }

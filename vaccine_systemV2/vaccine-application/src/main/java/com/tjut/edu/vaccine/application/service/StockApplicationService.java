@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -176,7 +177,7 @@ public class StockApplicationService {
         return StockAssembler.toBatchResponse(batch);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void transfer(StockTransferRequest req) {
         Long operatorId = securityContextPort.getCurrentUserId();
 
@@ -194,9 +195,9 @@ public class StockApplicationService {
             throw new BusinessException(ErrorCode.STOCK_TRANSFER_SAME_LOCATION);
         }
 
-        // 3. 查找来源库存并扣减
+        // 3. 查找来源库存并加行锁防止并发调拨
         HospitalVaccineStock fromStock = vaccineStockRepository
-                .findByLocation(req.getBatchId(), req.getFromType(), req.getFromId())
+                .findByLocationForUpdate(req.getBatchId(), req.getFromType(), req.getFromId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_TRANSFER_INSUFFICIENT));
 
         if (fromStock.getAvailableStock() < req.getQuantity()) {

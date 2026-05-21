@@ -20,6 +20,7 @@ import com.tjut.edu.vaccine.domain.identity.entity.DoctorSchedule;
 import com.tjut.edu.vaccine.domain.identity.entity.HospitalWindow;
 import com.tjut.edu.vaccine.domain.identity.entity.UserRole;
 import com.tjut.edu.vaccine.domain.identity.entity.WindowServiceConfig;
+import com.tjut.edu.vaccine.domain.appointment.repository.AppointmentRepository;
 import com.tjut.edu.vaccine.domain.identity.repository.DoctorScheduleRepository;
 import com.tjut.edu.vaccine.domain.identity.repository.HospitalWindowRepository;
 import com.tjut.edu.vaccine.domain.identity.repository.RoleRepository;
@@ -50,6 +51,7 @@ public class ScheduleApplicationService {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
+    private final AppointmentRepository appointmentRepository;
 
     /** 医生角色 → 窗口功能类型 映射（不含库管） */
     private static final Map<String, String> ROLE_TO_WINDOW_TYPE = Map.of(
@@ -132,8 +134,20 @@ public class ScheduleApplicationService {
 
     @Transactional
     public void deleteSchedule(Long id) {
-        doctorScheduleRepository.findById(id)
+        DoctorSchedule schedule = doctorScheduleRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SCHEDULE_NOT_FOUND));
+
+        // 检查该排班对应窗口在排班日期是否有未完成的预约
+        HospitalWindow window = hospitalWindowRepository.findById(schedule.getWindowId()).orElse(null);
+        if (window != null) {
+            List<Integer> activeStatuses = List.of(1, 6, 7, 10); // APPOINTED, SIGNED_IN, PRECHECK_PASS, OBSERVING
+            int activeCount = appointmentRepository.countByWindowAndStatus(
+                    window.getWindowCode(), activeStatuses, schedule.getScheduleDate());
+            if (activeCount > 0) {
+                throw new BusinessException(ErrorCode.SCHEDULE_CONFLICT);
+            }
+        }
+
         doctorScheduleRepository.deleteById(id);
         log.info("排班删除成功: scheduleId={}", id);
     }
