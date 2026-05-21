@@ -16,12 +16,12 @@ public interface AppointmentMapper extends BaseMapper<AppointmentPO> {
     @Select("SELECT * FROM appointment WHERE id = #{id} FOR UPDATE")
     AppointmentPO selectByIdForUpdate(Long id);
 
-    @Select("SELECT COUNT(*) FROM appointment WHERE vaccine_id = #{vaccineId} AND appointment_date = #{date} AND time_slot = #{slot} AND status NOT IN (3,4) FOR UPDATE")
+    @Select("SELECT COUNT(*) FROM appointment WHERE vaccine_id = #{vaccineId} AND appointment_date = #{date} AND time_slot = #{slot} FOR UPDATE")
     int countBySlotForUpdate(@Param("vaccineId") Long vaccineId,
                              @Param("date") LocalDate date,
                              @Param("slot") String slot);
 
-    @Select("SELECT time_slot AS timeSlot, COUNT(*) AS cnt FROM appointment WHERE vaccine_id = #{vaccineId} AND appointment_date = #{date} AND status NOT IN (3,4) GROUP BY time_slot")
+    @Select("SELECT time_slot, COUNT(*) AS cnt FROM appointment WHERE vaccine_id = #{vaccineId} AND appointment_date = #{date} GROUP BY time_slot")
     List<Map<String, Object>> countGroupBySlot(@Param("vaccineId") Long vaccineId,
                                                @Param("date") LocalDate date);
 
