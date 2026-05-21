@@ -254,6 +254,8 @@ async function submitAppointment() {
       timeSlot: latestSlot.slot
     })
     uni.showToast({ title: '预约成功', icon: 'success' })
+    await loadTimeSlots()
+    selectedTimeSlotId.value = null
     setTimeout(() => uni.navigateBack(), 1500)
   } catch {
     // 错误已由 interceptor 处理
